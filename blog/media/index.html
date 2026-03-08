@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Media — Marcelo Ixquiac</title>
+  <meta name="description" content="Fotografía y video." />
+  <link rel="stylesheet" href="../../style.css" />
+  <style>
+
+    .page-header {
+      padding-top:    var(--space-20);
+      padding-bottom: var(--space-12);
+      border-bottom:  1px solid var(--color-border);
+      margin-bottom:  var(--space-16);
+    }
+
+    .page-header__back {
+      display:       inline-flex;
+      align-items:   center;
+      gap:           var(--space-2);
+      font-family:   var(--font-sans);
+      font-size:     var(--text-sm);
+      color:         var(--color-text-muted);
+      margin-bottom: var(--space-6);
+      transition:    color var(--transition-fast);
+    }
+
+    .page-header__back:hover { color: var(--color-accent); }
+    .page-header__back:hover .arrow { transform: translateX(-3px); }
+    .page-header__back .arrow { transition: transform var(--transition-fast); }
+
+    .page-header__title {
+      font-size:      var(--text-4xl);
+      letter-spacing: -0.025em;
+      margin-bottom:  var(--space-4);
+      margin-top:     var(--space-4);
+    }
+
+    /* ── Filtros ── */
+    .filters {
+      display:       flex;
+      gap:           var(--space-3);
+      flex-wrap:     wrap;
+      margin-bottom: var(--space-6);
+    }
+
+    .filter-btn {
+      font-family:    var(--font-sans);
+      font-size:      var(--text-xs);
+      font-weight:    var(--weight-semibold);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color:          var(--color-text-muted);
+      padding:        0.35em 0.9em;
+      border:         1px solid var(--color-border);
+      border-radius:  100px;
+      cursor:         pointer;
+      background:     none;
+      transition:     all var(--transition-fast);
+    }
+
+    .filter-btn:hover  { border-color: var(--color-accent); color: var(--color-accent); }
+    .filter-btn.active { background: var(--color-accent); border-color: var(--color-accent); color: #fff; }
+
+    .items-count {
+      font-family:   var(--font-sans);
+      font-size:     var(--text-sm);
+      color:         var(--color-text-muted);
+      margin-bottom: var(--space-8);
+    }
+
+    /* ── Grid ── */
+    .media-grid {
+      display:               grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:                   var(--space-6);
+      margin-bottom:         var(--space-20);
+    }
+
+    .media-card {
+      display:         flex;
+      flex-direction:  column;
+      border:          1px solid var(--color-border);
+      border-radius:   var(--radius-lg);
+      overflow:        hidden;
+      background:      var(--color-bg-pure);
+      text-decoration: none;
+      transition:      box-shadow var(--transition-base);
+    }
+
+    .media-card:hover { box-shadow: var(--shadow-card); }
+    .media-card.hidden { display: none; }
+
+    .media-card__thumb {
+      width:           100%;
+      aspect-ratio:    4 / 3;
+      background:      var(--color-accent-light);
+      display:         flex;
+      align-items:     center;
+      justify-content: center;
+      overflow:        hidden;
+      flex-shrink:     0;
+      position:        relative;
+    }
+
+    .media-card__thumb img,
+    .media-card__thumb video {
+      width:      100%;
+      height:     100%;
+      object-fit: cover;
+    }
+
+    /* Badge destacado */
+    .media-card__badge {
+      position:       absolute;
+      top:            var(--space-3);
+      left:           var(--space-3);
+      font-family:    var(--font-sans);
+      font-size:      0.65rem;
+      font-weight:    var(--weight-semibold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color:          #fff;
+      background:     var(--color-accent);
+      border-radius:  100px;
+      padding:        0.2em 0.7em;
+    }
+
+    /* Ícono de video */
+    .media-card__play {
+      position:        absolute;
+      top:             50%;
+      left:            50%;
+      transform:       translate(-50%, -50%);
+      width:           44px;
+      height:          44px;
+      border-radius:   50%;
+      background:      rgba(27,58,107,0.8);
+      display:         flex;
+      align-items:     center;
+      justify-content: center;
+      color:           #fff;
+      font-size:       1.1rem;
+      pointer-events:  none;
+    }
+
+    .media-card__body {
+      padding: var(--space-5);
+    }
+
+    .media-card__meta {
+      display:       flex;
+      align-items:   center;
+      gap:           var(--space-3);
+      margin-bottom: var(--space-2);
+    }
+
+    .media-card__tipo {
+      font-family:    var(--font-sans);
+      font-size:      0.65rem;
+      font-weight:    var(--weight-semibold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color:          var(--color-accent);
+    }
+
+    .media-card__fecha {
+      font-family: var(--font-sans);
+      font-size:   var(--text-xs);
+      color:       var(--color-text-muted);
+    }
+
+    .media-card__title {
+      font-family:   var(--font-serif);
+      font-size:     var(--text-md);
+      font-weight:   var(--weight-semibold);
+      color:         var(--color-text);
+      margin-bottom: var(--space-2);
+      line-height:   var(--leading-snug);
+      transition:    color var(--transition-fast);
+    }
+
+    .media-card:hover .media-card__title { color: var(--color-accent); }
+
+    .media-card__desc {
+      font-family: var(--font-sans);
+      font-size:   var(--text-sm);
+      color:       var(--color-text-muted);
+      line-height: var(--leading-normal);
+    }
+
+    @media (max-width: 768px) {
+      .media-grid { grid-template-columns: 1fr 1fr; }
+      .page-header { padding-top: var(--space-12); }
+      .page-header__title { font-size: var(--text-3xl); }
+    }
+
+    @media (max-width: 480px) {
+      .media-grid { grid-template-columns: 1fr; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav class="nav" id="main-nav">
+    <div class="nav__inner">
+      <a href="../../index.html" class="nav__logo">Marcelo Ixquiac</a>
+      <ul class="nav__links">
+        <li><a href="../../about.html"    class="nav__link">Sobre mí</a></li>
+        <li><a href="../../projects.html" class="nav__link">Proyectos</a></li>
+        <li><a href="../../blog.html"     class="nav__link active">Blog</a></li>
+        <li><a href="../../now.html"      class="nav__link">Ahora</a></li>
+        <li><a href="../../contact.html"  class="nav__link">Contacto</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container container--content">
+
+      <header class="page-header">
+        <a href="../../blog.html" class="page-header__back">
+          <span class="arrow">←</span> Blog
+        </a>
+        <p class="section-label">Blog · Media</p>
+        <h1 class="page-header__title">Media</h1>
+      </header>
+
+      <div class="filters" id="filters">
+        <button class="filter-btn active" data-filter="all">Todo</button>
+        <button class="filter-btn" data-filter="foto">Fotos</button>
+        <button class="filter-btn" data-filter="video">Videos</button>
+      </div>
+
+      <p class="items-count" id="items-count"></p>
+
+      <div class="media-grid" id="media-grid"></div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <p class="footer__copy">Marcelo Ixquiac &copy; 2025</p>
+      <div class="footer__links">
+        <a href="mailto:tu@email.com"             class="footer__link">Email</a>
+        <a href="https://github.com/tuusuario"     class="footer__link" target="_blank">GitHub</a>
+        <a href="https://linkedin.com/in/tuperfil" class="footer__link" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true });
+
+    function buildCard(item) {
+      const a = document.createElement('a');
+      a.href      = `${item.slug}/index.html`;
+      a.className = 'media-card';
+      a.dataset.tipo = item.tipo;
+
+      let thumbContent = '';
+      if (item.tipo === 'video') {
+        thumbContent = `
+          <video src="${item.slug}/${item.archivo}" muted playsinline preload="metadata"
+            style="pointer-events:none;"></video>
+          <div class="media-card__play">▶</div>`;
+      } else if (item.tipo === 'foto' && item.archivo) {
+        thumbContent = `<img src="${item.slug}/${item.archivo}" alt="${item.titulo}" />`;
+      }
+      if (item.destacado) {
+        thumbContent += `<span class="media-card__badge">Destacado</span>`;
+      }
+
+      a.innerHTML = `
+        <div class="media-card__thumb">${thumbContent}</div>
+        <div class="media-card__body">
+          <div class="media-card__meta">
+            <span class="media-card__tipo">${item.tipo}</span>
+            <span class="media-card__fecha">${item.fecha}</span>
+          </div>
+          <p class="media-card__title">${item.titulo}</p>
+          <p class="media-card__desc">${item.descripcion}</p>
+        </div>`;
+      return a;
+    }
+
+    function applyFilter(filter) {
+      const cards   = document.querySelectorAll('.media-card');
+      const countEl = document.getElementById('items-count');
+      let visible   = 0;
+      cards.forEach(c => {
+        const show = filter === 'all' || c.dataset.tipo === filter;
+        c.classList.toggle('hidden', !show);
+        if (show) visible++;
+      });
+      countEl.textContent = `${visible} publicación${visible !== 1 ? 'es' : ''}`;
+    }
+
+    fetch('media.json')
+      .then(r => r.json())
+      .then(items => {
+        const grid = document.getElementById('media-grid');
+        // Destacados primero, luego el resto por fecha
+        const sorted = items.filter(i => i.destacado)
+          .concat(items.filter(i => !i.destacado));
+        sorted.forEach(item => grid.appendChild(buildCard(item)));
+
+        document.getElementById('items-count').textContent =
+          `${items.length} publicación${items.length !== 1 ? 'es' : ''}`;
+
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyFilter(btn.dataset.filter);
+          });
+        });
+      })
+      .catch(() => {
+        document.getElementById('media-grid').innerHTML =
+          `<p style="font-family:var(--font-sans);font-size:var(--text-sm);
+           color:var(--color-text-muted);grid-column:1/-1;">
+           Usa <code>python -m http.server</code> para ver el contenido.</p>`;
+      });
+  </script>
+
+</body>
+</html>

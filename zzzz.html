@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ── SEO básico ── -->
+  <title>Marcelo Ixquiac — Estudiante de Física</title>
+  <meta name="description" content="Estudiante de Física en [Universidad]. Física computacional, simulación numérica y pensamiento riguroso." />
+
+  <!-- ── Estilos ── -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- ── Estilos específicos del Home ── -->
+  <style>
+
+    /* Hero: sección principal */
+    .hero {
+      padding-top:    var(--space-32);
+      padding-bottom: var(--space-24);
+    }
+
+    .hero__eyebrow {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      margin-bottom: var(--space-8);
+    }
+
+    .hero__dot {
+      width:  8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--color-accent);
+      flex-shrink: 0;
+    }
+
+    /* Nombre con subrayado decorativo al hover */
+    .hero__name {
+      display: inline-block;
+      position: relative;
+    }
+
+    .hero__name::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 4px;
+      width: 100%;
+      height: 3px;
+      background-color: var(--color-accent);
+      opacity: 0;
+      transform: scaleX(0.6);
+      transform-origin: left;
+      transition: opacity var(--transition-slow), transform var(--transition-slow);
+    }
+
+    .hero:hover .hero__name::after {
+      opacity: 0.25;
+      transform: scaleX(1);
+    }
+
+    .hero__tagline {
+      margin-top:    var(--space-5);
+      margin-bottom: var(--space-8);
+    }
+
+    .hero__intro {
+      max-width: 580px;
+      margin-bottom: var(--space-10);
+    }
+
+    /* Separador visual entre hero y secciones */
+    .home-divider {
+      width: 40px;
+      height: 1px;
+      background-color: var(--color-border-dark);
+      margin-block: var(--space-20);
+    }
+
+    /* ── Sección proyectos destacados ── */
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: var(--space-8);
+    }
+
+    .section-header__title {
+      font-family: var(--font-serif);
+      font-size: var(--text-2xl);
+      font-weight: var(--weight-semibold);
+      letter-spacing: -0.015em;
+    }
+
+    /* ── Sección blog destacado ── */
+
+    .blog-featured {
+      padding-top: var(--space-6);
+    }
+
+    /* ── About strip: franja breve sobre mí ── */
+
+    .about-strip {
+      background-color: var(--color-bg-pure);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-10) var(--space-10);
+      margin-block: var(--space-20);
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: var(--space-12);
+      align-items: center;
+    }
+
+    .about-strip__text p {
+      font-size: var(--text-md);
+      line-height: var(--leading-relaxed);
+      color: var(--color-text);
+      margin-bottom: var(--space-5);
+    }
+
+    .about-strip__text p:last-of-type {
+      margin-bottom: var(--space-6);
+    }
+
+    .about-strip__stats {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-6);
+      border-left: 1px solid var(--color-border);
+      padding-left: var(--space-12);
+    }
+
+    .stat {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-1);
+    }
+
+    .stat__number {
+      font-family: var(--font-serif);
+      font-size: var(--text-4xl);
+      font-weight: var(--weight-semibold);
+      color: var(--color-accent);
+      letter-spacing: -0.03em;
+      line-height: 1;
+    }
+
+    .stat__label {
+      font-family: var(--font-sans);
+      font-size: var(--text-sm);
+      color: var(--color-text-muted);
+    }
+
+    /* ── Responsive ── */
+
+    @media (max-width: 768px) {
+      .hero {
+        padding-top: var(--space-20);
+        padding-bottom: var(--space-16);
+      }
+
+      .about-strip {
+        grid-template-columns: 1fr;
+        gap: var(--space-8);
+        padding: var(--space-8);
+      }
+
+      .about-strip__stats {
+        border-left: none;
+        border-top: 1px solid var(--color-border);
+        padding-left: 0;
+        padding-top: var(--space-6);
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: var(--space-8);
+      }
+
+      .section-header {
+        flex-direction: column;
+        gap: var(--space-3);
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════════
+       NAVEGACIÓN
+  ════════════════════════════════════════════ -->
+  <nav class="nav" id="main-nav">
+    <div class="nav__inner">
+      <a href="index.html" class="nav__logo">Marcelo Ixquiac</a>
+      <ul class="nav__links">
+        <li><a href="about.html"    class="nav__link">Sobre mí</a></li>
+        <li><a href="projects.html" class="nav__link">Proyectos</a></li>
+        <li><a href="blog.html"     class="nav__link">Blog</a></li>
+        <li><a href="now.html"      class="nav__link">Ahora</a></li>
+        <li><a href="contact.html"  class="nav__link">Contacto</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ════════════════════════════════════════════
+       MAIN
+  ════════════════════════════════════════════ -->
+  <main>
+    <div class="container container--content">
+
+      <!-- ── HERO ──────────────────────────────── -->
+      <section class="hero">
+
+        <div class="hero__eyebrow">
+          <span class="hero__dot"></span>
+          <span class="section-label">Física · Universidad del Valle de Guatemala · Tercer año</span>
+        </div>
+
+        <h1 class="hero-name">
+          <span class="hero__name">Marcelo Román<br>Ixquiac Kristancic</span>
+        </h1>
+
+        <p class="hero-tagline hero__tagline">
+          Estudiante de Física &nbsp;·&nbsp; Física computacional &nbsp;·&nbsp;
+          Simulación numérica
+        </p>
+
+        <p class="lead hero__intro">
+          Estudio cómo los sistemas físicos evolucionan en el tiempo y cómo
+          representarlos con precisión en una computadora. Este sitio documenta
+          mis proyectos, mis reflexiones técnicas y lo que estoy aprendiendo.
+        </p>
+
+        <div class="cta-group">
+          <a href="projects.html" class="cta">
+            Ver proyectos <span class="arrow">→</span>
+          </a>
+          <a href="blog.html" class="cta">
+            Leer el blog <span class="arrow">→</span>
+          </a>
+          <a href="contact.html" class="cta">
+            Contacto <span class="arrow">→</span>
+          </a>
+        </div>
+
+      </section>
+
+      <div class="home-divider"></div>
+
+      <!-- ── PROYECTOS DESTACADOS ───────────────── -->
+      <section>
+        <div class="section-header">
+          <h2 class="section-header__title">Proyectos recientes</h2>
+          <a href="projects.html" class="cta" style="font-size: var(--text-sm);">
+            Ver todos <span class="arrow">→</span>
+          </a>
+        </div>
+
+        <div>
+
+          <a href="projects/wave-equation.html" class="project-row" style="display: grid;">
+            <div>
+              <p class="project-row__title">Simulación de la ecuación de onda</p>
+              <p class="project-row__desc">
+                Método de diferencias finitas para modelar la propagación de ondas
+                en medios con velocidad variable. Análisis de estabilidad y
+                condiciones de contorno absorbentes.
+              </p>
+              <div class="project-row__tags">
+                <span class="tag">Python</span>
+                <span class="tag">NumPy</span>
+                <span class="tag">Matplotlib</span>
+              </div>
+            </div>
+            <span class="project-row__arrow">↗</span>
+          </a>
+
+          <a href="projects/nbody.html" class="project-row" style="display: grid;">
+            <div>
+              <p class="project-row__title">Integrador de N cuerpos con Verlet</p>
+              <p class="project-row__desc">
+                Integrador simpléctico para sistemas gravitacionales de N partículas.
+                Conservación de energía a largo plazo y comparación con Runge-Kutta.
+              </p>
+              <div class="project-row__tags">
+                <span class="tag">C++</span>
+                <span class="tag">OpenMP</span>
+                <span class="tag">Python</span>
+              </div>
+            </div>
+            <span class="project-row__arrow">↗</span>
+          </a>
+
+          <a href="projects/chaos.html" class="project-row" style="display: grid;">
+            <div>
+              <p class="project-row__title">Exponente de Lyapunov en el péndulo caótico</p>
+              <p class="project-row__desc">
+                Caracterización de la sensibilidad a condiciones iniciales del
+                péndulo doble mediante el exponente de Lyapunov máximo.
+              </p>
+              <div class="project-row__tags">
+                <span class="tag">Python</span>
+                <span class="tag">SciPy</span>
+                <span class="tag">Jupyter</span>
+              </div>
+            </div>
+            <span class="project-row__arrow">↗</span>
+          </a>
+
+        </div>
+      </section>
+
+      <!-- ── FRANJA SOBRE MÍ ────────────────────── -->
+      <div class="about-strip">
+        <div class="about-strip__text">
+          <p class="section-label mb-6">Sobre mí</p>
+          <p>
+            Soy estudiante de tercer año de Física en [Universidad]. Me interesa
+            la intersección entre física teórica y métodos computacionales: cómo
+            traducir un modelo matemático en un algoritmo que preserve las
+            propiedades fundamentales del sistema.
+          </p>
+          <p>
+            Fuera del laboratorio escribo sobre lo que aprendo. Creo que explicar
+            bien algo es la prueba más honesta de que lo entiendes.
+          </p>
+          <a href="about.html" class="cta">
+            Leer más <span class="arrow">→</span>
+          </a>
+        </div>
+
+        <div class="about-strip__stats">
+          <div class="stat">
+            <span class="stat__number">3°</span>
+            <span class="stat__label">año de licenciatura</span>
+          </div>
+          <div class="stat">
+            <span class="stat__number">6+</span>
+            <span class="stat__label">proyectos documentados</span>
+          </div>
+          <div class="stat">
+            <span class="stat__number">12+</span>
+            <span class="stat__label">artículos publicados</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BLOG DESTACADO ─────────────────────── -->
+      <section class="blog-featured">
+        <div class="section-header">
+          <h2 class="section-header__title">Artículos recientes</h2>
+          <a href="blog.html" class="cta" style="font-size: var(--text-sm);">
+            Ver todos <span class="arrow">→</span>
+          </a>
+        </div>
+
+        <div>
+
+          <a href="blog/runge-kutta.html" class="blog-entry">
+            <div class="blog-entry__date">Ene 2025</div>
+            <div>
+              <p class="blog-entry__title">
+                Por qué el método de Runge-Kutta funciona tan bien
+              </p>
+              <p class="blog-entry__excerpt">
+                Una derivación desde cero que muestra la intuición geométrica
+                detrás del algoritmo y por qué el error local es de quinto orden.
+              </p>
+            </div>
+          </a>
+
+          <a href="blog/chaos.html" class="blog-entry">
+            <div class="blog-entry__date">Dic 2024</div>
+            <div>
+              <p class="blog-entry__title">
+                Caos determinista y el péndulo doble
+              </p>
+              <p class="blog-entry__excerpt">
+                Exploración del espacio de fase de un sistema caótico simple y
+                qué significa que dos trayectorias cercanas diverjan exponencialmente.
+              </p>
+            </div>
+          </a>
+
+          <a href="blog/finite-differences.html" class="blog-entry">
+            <div class="blog-entry__date">Nov 2024</div>
+            <div>
+              <p class="blog-entry__title">
+                Diferencias finitas: errores que no son errores
+              </p>
+              <p class="blog-entry__excerpt">
+                El error de truncamiento no es un problema de implementación.
+                Es física. Notas sobre consistencia, estabilidad y convergencia.
+              </p>
+            </div>
+          </a>
+
+        </div>
+      </section>
+
+      <div style="height: var(--space-20);"></div>
+
+    </div><!-- /container -->
+  </main>
+
+  <!-- ════════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <p class="footer__copy">Marcelo Ixquiac &copy; 2025</p>
+      <div class="footer__links">
+        <a href="mailto:tu@email.com"               class="footer__link">Email</a>
+        <a href="https://github.com/tuusuario"       class="footer__link" target="_blank">GitHub</a>
+        <a href="https://linkedin.com/in/tuperfil"   class="footer__link" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ════════════════════════════════════════════
+       JS mínimo
+  ════════════════════════════════════════════ -->
+  <script>
+    // Borde en la nav al hacer scroll
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true });
+  </script>
+
+</body>
+</html>

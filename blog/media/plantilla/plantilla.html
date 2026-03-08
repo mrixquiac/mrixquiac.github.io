@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!--
+  ╔════════════════════════════════════════════════════════════╗
+  ║  PLANTILLA — Publicación de Media (foto o video)          ║
+  ║                                                           ║
+  ║  1. Crea una carpeta en blog/media/ con el slug           ║
+  ║     Ejemplo: blog/media/olas-de-madrugada/                ║
+  ║  2. Pon el archivo multimedia dentro de esa carpeta       ║
+  ║     Foto:  foto.jpg  (o .png, .webp)                      ║
+  ║     Video: video.mp4                                      ║
+  ║     Si tiene ambos: foto.jpg Y video.mp4                  ║
+  ║  3. Copia este archivo a esa carpeta como index.html      ║
+  ║  4. Rellena los ✏️ con el contenido de la publicación     ║
+  ║  5. Agrega la entrada en blog/media/media.json            ║
+  ╚════════════════════════════════════════════════════════════╝
+
+  Campos en media.json para esta publicación:
+  {
+    "slug":        "nombre-de-la-carpeta",
+    "titulo":      "Título",
+    "descripcion": "Descripción breve (aparece en el índice)",
+    "tipo":        "foto" | "video" | "foto+video",
+    "archivo":     "foto.jpg",   ← nombre del archivo principal
+    "fecha":       "Ene 2025",
+    "destacado":   false
+  }
+  -->
+
+  <!-- ✏️ Título de la pestaña -->
+  <title>✏️ Título de la publicación — Marcelo Ixquiac</title>
+
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+
+    .post-header {
+      padding-top:    var(--space-20);
+      padding-bottom: var(--space-10);
+      margin-bottom:  var(--space-10);
+    }
+
+    .post-header__back {
+      display:       inline-flex;
+      align-items:   center;
+      gap:           var(--space-2);
+      font-family:   var(--font-sans);
+      font-size:     var(--text-sm);
+      color:         var(--color-text-muted);
+      margin-bottom: var(--space-8);
+      transition:    color var(--transition-fast);
+    }
+
+    .post-header__back:hover { color: var(--color-accent); }
+    .post-header__back:hover .arrow { transform: translateX(-3px); }
+    .post-header__back .arrow { transition: transform var(--transition-fast); }
+
+    .post-header__meta {
+      display:       flex;
+      align-items:   center;
+      gap:           var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+
+    .post-header__tipo {
+      font-family:    var(--font-sans);
+      font-size:      0.65rem;
+      font-weight:    var(--weight-semibold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color:          var(--color-accent);
+    }
+
+    .post-header__fecha {
+      font-family: var(--font-sans);
+      font-size:   var(--text-sm);
+      color:       var(--color-text-muted);
+    }
+
+    .post-header__title {
+      font-size:      var(--text-4xl);
+      letter-spacing: -0.025em;
+      line-height:    var(--leading-tight);
+      margin-bottom:  var(--space-5);
+    }
+
+    .post-header__desc {
+      font-family: var(--font-serif);
+      font-size:   var(--text-lg);
+      color:       var(--color-text-muted);
+      font-style:  italic;
+      max-width:   600px;
+      line-height: var(--leading-relaxed);
+    }
+
+    /* ── Media principal ── */
+    .post-media {
+      margin-bottom: var(--space-10);
+    }
+
+    /* Foto */
+    .post-photo {
+      width:         100%;
+      border-radius: var(--radius-lg);
+      border:        1px solid var(--color-border);
+      display:       block;
+      margin-bottom: var(--space-4);
+
+      /*
+        ✏️ La foto se mostrará a ancho completo del contenedor.
+           Si quieres limitar el alto máximo descomenta la línea:
+        max-height: 600px;
+        object-fit: cover;
+      */
+    }
+
+    /* Video */
+    .post-video {
+      width:         100%;
+      border-radius: var(--radius-lg);
+      border:        1px solid var(--color-border);
+      display:       block;
+      margin-bottom: var(--space-4);
+      background:    #000;
+    }
+
+    /* Caption debajo del media */
+    .post-caption {
+      font-family: var(--font-sans);
+      font-size:   var(--text-sm);
+      color:       var(--color-text-muted);
+      font-style:  italic;
+      text-align:  center;
+      margin-bottom: var(--space-10);
+    }
+
+    /* ── Separador entre foto y video (si hay ambos) ── */
+    .media-sep {
+      margin:     var(--space-10) 0;
+      border:     none;
+      border-top: 1px solid var(--color-border);
+    }
+
+    /* ── Texto adicional / nota ── */
+    .post-text {
+      font-family:   var(--font-serif);
+      font-size:     var(--text-md);
+      line-height:   var(--leading-relaxed);
+      color:         var(--color-text);
+      max-width:     var(--width-blog);
+      margin-bottom: var(--space-16);
+    }
+
+    .post-text p { margin-bottom: var(--space-5); }
+    .post-text p:last-child { margin-bottom: 0; }
+
+    @media (max-width: 768px) {
+      .post-header { padding-top: var(--space-12); }
+      .post-header__title { font-size: var(--text-3xl); }
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav class="nav" id="main-nav">
+    <div class="nav__inner">
+      <a href="../../../index.html" class="nav__logo">Marcelo Ixquiac</a>
+      <ul class="nav__links">
+        <li><a href="../../../about.html"    class="nav__link">Sobre mí</a></li>
+        <li><a href="../../../projects.html" class="nav__link">Proyectos</a></li>
+        <li><a href="../../../blog.html"     class="nav__link active">Blog</a></li>
+        <li><a href="../../../now.html"      class="nav__link">Ahora</a></li>
+        <li><a href="../../../contact.html"  class="nav__link">Contacto</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container container--content">
+
+      <!-- ── CABECERA ── -->
+      <header class="post-header">
+
+        <a href="../index.html" class="post-header__back">
+          <span class="arrow">←</span> Media
+        </a>
+
+        <div class="post-header__meta">
+          <!-- ✏️ tipo: "Foto", "Video" o "Foto · Video" -->
+          <span class="post-header__tipo">✏️ Foto</span>
+          <span class="post-header__fecha">·</span>
+          <!-- ✏️ Fecha: "Ene 2025" -->
+          <span class="post-header__fecha">✏️ Ene 2025</span>
+        </div>
+
+        <!-- ✏️ Título de la publicación -->
+        <h1 class="post-header__title">✏️ Título de la publicación</h1>
+
+        <!--
+          ✏️ Descripción breve en cursiva debajo del título.
+             Si no quieres descripción, elimina este párrafo.
+        -->
+        <p class="post-header__desc">
+          ✏️ Descripción breve o subtítulo de la publicación.
+          Una o dos oraciones.
+        </p>
+
+      </header>
+
+      <!-- ════════════════════════════════════
+           MEDIA PRINCIPAL
+           Lee las instrucciones de cada bloque
+           y elimina los que no uses.
+      ════════════════════════════════════ -->
+
+      <div class="post-media">
+
+        <!--
+          ══════════════════
+          BLOQUE A — FOTO
+          ══════════════════
+          ✏️ Cambia "foto.jpg" por el nombre real de tu imagen.
+          ✏️ La imagen debe estar en la misma carpeta que este index.html.
+          ✏️ Si NO tienes foto, elimina todo este bloque.
+        -->
+        <img
+          src="foto.jpg"
+          alt="✏️ Descripción de la imagen para accesibilidad"
+          class="post-photo"
+        />
+
+        <!--
+          ✏️ Caption de la foto.
+             Si no quieres caption, elimina el párrafo.
+        -->
+        <p class="post-caption">
+          ✏️ Pie de foto: lugar, fecha, contexto o lo que quieras escribir aquí.
+        </p>
+
+        <!--
+          ══════════════════
+          SEPARADOR (solo si tienes FOTO y VIDEO)
+          ══════════════════
+          ✏️ Si la publicación tiene solo foto o solo video,
+             elimina esta línea.
+        -->
+        <hr class="media-sep" />
+
+        <!--
+          ══════════════════
+          BLOQUE B — VIDEO
+          ══════════════════
+          ✏️ Cambia "video.mp4" por el nombre real de tu video.
+          ✏️ El video debe estar en la misma carpeta que este index.html.
+          ✏️ Si NO tienes video, elimina todo este bloque.
+          Atributos útiles:
+            controls   → muestra controles de reproducción (recomendado)
+            autoplay   → reproduce automáticamente (no recomendado)
+            loop       → repite en bucle
+            muted      → sin sonido por defecto
+        -->
+        <video
+          src="video.mp4"
+          class="post-video"
+          controls
+          playsinline
+        ></video>
+
+        <!--
+          ✏️ Caption del video.
+             Si no quieres caption, elimina el párrafo.
+        -->
+        <p class="post-caption">
+          ✏️ Pie de video: descripción del clip, lugar, fecha o contexto.
+        </p>
+
+      </div><!-- /post-media -->
+
+      <!--
+        ══════════════════════════════════════
+        TEXTO ADICIONAL (opcional)
+        ══════════════════════════════════════
+        ✏️ Aquí puedes escribir un texto más largo sobre la publicación:
+           contexto, reflexión, historia detrás de la foto/video, etc.
+        ✏️ Si no quieres texto adicional, elimina toda esta sección.
+      -->
+      <div class="post-text">
+        <p>
+          ✏️ Texto adicional sobre esta publicación. Puede ser el contexto
+          de la foto, una reflexión, una historia, o simplemente nada.
+          Esta sección es completamente opcional.
+        </p>
+        <p>
+          ✏️ Segundo párrafo si lo necesitas. Si solo quieres un párrafo,
+          elimina este.
+        </p>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <p class="footer__copy">Marcelo Ixquiac &copy; 2025</p>
+      <div class="footer__links">
+        <a href="mailto:tu@email.com"               class="footer__link">Email</a>
+        <a href="https://github.com/tuusuario"       class="footer__link" target="_blank">GitHub</a>
+        <a href="https://linkedin.com/in/tuperfil"   class="footer__link" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frases — Marcelo Ixquiac</title>
+  <meta name="description" content="Frases que vale la pena guardar." />
+  <link rel="stylesheet" href="../../style.css" />
+  <style>
+
+    .page-header {
+      padding-top:    var(--space-20);
+      padding-bottom: var(--space-12);
+      border-bottom:  1px solid var(--color-border);
+      margin-bottom:  var(--space-16);
+    }
+
+    .page-header__back {
+      display:       inline-flex;
+      align-items:   center;
+      gap:           var(--space-2);
+      font-family:   var(--font-sans);
+      font-size:     var(--text-sm);
+      color:         var(--color-text-muted);
+      margin-bottom: var(--space-6);
+      transition:    color var(--transition-fast);
+    }
+
+    .page-header__back:hover { color: var(--color-accent); }
+    .page-header__back:hover .arrow { transform: translateX(-3px); }
+    .page-header__back .arrow { transition: transform var(--transition-fast); }
+
+    .page-header__title {
+      font-size:      var(--text-4xl);
+      letter-spacing: -0.025em;
+      margin-top:     var(--space-4);
+    }
+
+    /* ── Lista de frases ── */
+    .frases-list {
+      max-width:     var(--width-blog);
+      margin-bottom: var(--space-24);
+    }
+
+    .frase-item {
+      padding:       var(--space-10) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .frase-item:first-child { border-top: 1px solid var(--color-border); }
+
+    /* Badge de destacado */
+    .frase-item--featured .frase-item__text::before {
+      content:        '★ ';
+      color:          var(--color-accent);
+      font-style:     normal;
+      font-size:      0.8em;
+    }
+
+    .frase-item__text {
+      font-family:   var(--font-serif);
+      font-size:     var(--text-xl);
+      font-style:    italic;
+      line-height:   var(--leading-loose);
+      color:         var(--color-text);
+      margin-bottom: var(--space-4);
+    }
+
+    .frase-item__footer {
+      display:     flex;
+      align-items: center;
+      justify-content: space-between;
+      gap:         var(--space-4);
+    }
+
+    .frase-item__autor {
+      font-family: var(--font-sans);
+      font-size:   var(--text-sm);
+      color:       var(--color-text-muted);
+    }
+
+    .frase-item__fecha {
+      font-family: var(--font-sans);
+      font-size:   var(--text-xs);
+      color:       var(--color-text-light);
+    }
+
+    @media (max-width: 768px) {
+      .page-header { padding-top: var(--space-12); }
+      .page-header__title { font-size: var(--text-3xl); }
+      .frase-item__text { font-size: var(--text-lg); }
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav class="nav" id="main-nav">
+    <div class="nav__inner">
+      <a href="../../index.html" class="nav__logo">Marcelo Ixquiac</a>
+      <ul class="nav__links">
+        <li><a href="../../about.html"    class="nav__link">Sobre mí</a></li>
+        <li><a href="../../projects.html" class="nav__link">Proyectos</a></li>
+        <li><a href="../../blog.html"     class="nav__link active">Blog</a></li>
+        <li><a href="../../now.html"      class="nav__link">Ahora</a></li>
+        <li><a href="../../contact.html"  class="nav__link">Contacto</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+
+      <header class="page-header">
+        <a href="../../blog.html" class="page-header__back">
+          <span class="arrow">←</span> Blog
+        </a>
+        <p class="section-label">Blog · Frases</p>
+        <h1 class="page-header__title">Frases</h1>
+      </header>
+
+      <div class="frases-list" id="frases-list"></div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <p class="footer__copy">Marcelo Ixquiac &copy; 2025</p>
+      <div class="footer__links">
+        <a href="mailto:tu@email.com"             class="footer__link">Email</a>
+        <a href="https://github.com/tuusuario"     class="footer__link" target="_blank">GitHub</a>
+        <a href="https://linkedin.com/in/tuperfil" class="footer__link" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true });
+
+    fetch('frases.json')
+      .then(r => r.json())
+      .then(frases => {
+        const list = document.getElementById('frases-list');
+        const sorted = frases.filter(f => f.destacado)
+          .concat(frases.filter(f => !f.destacado));
+
+        sorted.forEach(f => {
+          const div = document.createElement('div');
+          div.className = 'frase-item' + (f.destacado ? ' frase-item--featured' : '');
+
+          // Formatear fecha legible
+          const fecha = f.fecha
+            ? new Date(f.fecha + 'T12:00:00').toLocaleDateString('es-MX', {
+                year: 'numeric', month: 'short', day: 'numeric'
+              })
+            : '';
+
+          div.innerHTML = `
+            <p class="frase-item__text">"${f.texto}"</p>
+            <div class="frase-item__footer">
+              <span class="frase-item__autor">${f.autor ? '— ' + f.autor : ''}</span>
+              <span class="frase-item__fecha">${fecha}</span>
+            </div>`;
+          list.appendChild(div);
+        });
+      })
+      .catch(() => {
+        document.getElementById('frases-list').innerHTML =
+          `<p style="font-family:var(--font-sans);font-size:var(--text-sm);
+           color:var(--color-text-muted);">
+           Usa <code>python -m http.server</code> para ver el contenido.</p>`;
+      });
+  </script>
+
+</body>
+</html>

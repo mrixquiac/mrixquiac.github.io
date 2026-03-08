@@ -1,0 +1,23 @@
+[
+  {
+    "slug":      "feynman-naturaleza",
+    "texto":     "La naturaleza usa solo los hilos más largos para tejer sus patrones, de modo que cada pequeña pieza de su tela revela la organización de todo el tapiz.",
+    "autor":     "Richard Feynman",
+    "fecha":     "2025-01-10",
+    "destacado": true
+  },
+  {
+    "slug":      "sobre-el-silencio",
+    "texto":     "Hay preguntas que no merecen una respuesta rápida. Merecen silencio, y luego una respuesta lenta.",
+    "autor":     "",
+    "fecha":     "2025-01-05",
+    "destacado": false
+  },
+  {
+    "slug":      "dirac-belleza",
+    "texto":     "Una ecuación física hermosa tiene más probabilidades de ser correcta que una fea.",
+    "autor":     "Paul Dirac",
+    "fecha":     "2024-12-20",
+    "destacado": false
+  }
+]

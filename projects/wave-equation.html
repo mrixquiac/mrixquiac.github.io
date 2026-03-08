@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ── SEO básico ── -->
+  <title>Simulación de la ecuación de onda — Marcelo Ixquiac</title>
+  <meta name="description" content="Método de diferencias finitas para modelar la propagación de ondas en medios con velocidad variable." />
+
+  <!-- ── Estilos ── -->
+  <link rel="stylesheet" href="../style.css" />
+
+  <style>
+
+    /* ── Cabecera del proyecto ── */
+    .project-header {
+      padding-top:    var(--space-20);
+      padding-bottom: var(--space-12);
+      border-bottom:  1px solid var(--color-border);
+      margin-bottom:  var(--space-12);
+    }
+
+    .project-header__back {
+      display:       inline-flex;
+      align-items:   center;
+      gap:           var(--space-2);
+      font-family:   var(--font-sans);
+      font-size:     var(--text-sm);
+      color:         var(--color-text-muted);
+      margin-bottom: var(--space-8);
+      transition:    color var(--transition-fast);
+    }
+
+    .project-header__back:hover {
+      color: var(--color-accent);
+    }
+
+    .project-header__back .arrow {
+      transition: transform var(--transition-fast);
+    }
+
+    .project-header__back:hover .arrow {
+      transform: translateX(-3px);
+    }
+
+    .project-header__tags {
+      display:       flex;
+      flex-wrap:     wrap;
+      gap:           var(--space-2);
+      margin-bottom: var(--space-5);
+    }
+
+    .project-header__title {
+      font-size:      var(--text-4xl);
+      letter-spacing: -0.025em;
+      margin-bottom:  var(--space-5);
+      line-height:    var(--leading-tight);
+    }
+
+    .project-header__desc {
+      font-size:   var(--text-lg);
+      line-height: var(--leading-relaxed);
+      color:       var(--color-text-muted);
+      max-width:   600px;
+      font-style:  italic;
+    }
+
+    /* ── Layout: contenido + sidebar ── */
+    .project-layout {
+      display:               grid;
+      grid-template-columns: 1fr 240px;
+      gap:                   var(--space-16);
+      align-items:           start;
+    }
+
+    /* ── Contenido principal ── */
+    .project-content {
+      font-family: var(--font-serif);
+      font-size:   var(--text-md);
+      line-height: var(--leading-relaxed);
+    }
+
+    .project-content p {
+      margin-bottom: var(--space-6);
+    }
+
+    .project-content h2 {
+      font-size:     var(--text-2xl);
+      letter-spacing: -0.015em;
+      margin-top:    var(--space-12);
+      margin-bottom: var(--space-4);
+    }
+
+    .project-content h3 {
+      font-size:     var(--text-xl);
+      letter-spacing: -0.01em;
+      margin-top:    var(--space-8);
+      margin-bottom: var(--space-3);
+    }
+
+    .project-content code {
+      font-family: 'Courier New', Courier, monospace;
+      font-size:   0.88em;
+      background:  var(--color-accent-light);
+      color:       var(--color-accent);
+      padding:     0.1em 0.35em;
+      border-radius: var(--radius-sm);
+    }
+
+    .project-content pre {
+      background:    #F1F3F7;
+      border:        1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding:       var(--space-6);
+      margin:        var(--space-8) 0;
+      overflow-x:    auto;
+    }
+
+    .project-content pre code {
+      background:    none;
+      color:         var(--color-text);
+      padding:       0;
+      font-size:     var(--text-sm);
+      line-height:   1.65;
+    }
+
+    .project-content blockquote {
+      border-left: 3px solid var(--color-accent);
+      padding-left: var(--space-6);
+      margin:      var(--space-8) 0;
+      color:       var(--color-text-muted);
+      font-style:  italic;
+    }
+
+    /* Bloque de sección dentro del contenido */
+    .content-block {
+      padding-top:  var(--space-10);
+      margin-top:   var(--space-10);
+      border-top:   1px solid var(--color-border);
+    }
+
+    .content-block__label {
+      margin-bottom: var(--space-5);
+    }
+
+    /* ── Imagen / figura del proyecto ── */
+    .project-figure {
+      background-color: var(--color-bg-pure);
+      border:           1px solid var(--color-border);
+      border-radius:    var(--radius-lg);
+      overflow:         hidden;
+      margin:           var(--space-8) 0;
+    }
+
+    .project-figure__img {
+      width:      100%;
+      display:    block;
+      background: var(--color-accent-light);
+      min-height: 200px;
+
+      /* Placeholder visual hasta que haya imagen real */
+      display:         flex;
+      align-items:     center;
+      justify-content: center;
+      font-family:     var(--font-sans);
+      font-size:       var(--text-sm);
+      color:           var(--color-text-muted);
+      padding:         var(--space-12);
+      text-align:      center;
+    }
+
+    .project-figure__caption {
+      padding:     var(--space-4) var(--space-6);
+      border-top:  1px solid var(--color-border);
+      font-family: var(--font-sans);
+      font-size:   var(--text-xs);
+      color:       var(--color-text-muted);
+      font-style:  italic;
+    }
+
+    /* ── Sidebar ── */
+    .project-sidebar {
+      position: sticky;
+      top:      calc(64px + var(--space-8));
+    }
+
+    .sidebar-card {
+      background-color: var(--color-bg-pure);
+      border:           1px solid var(--color-border);
+      border-radius:    var(--radius-lg);
+      padding:          var(--space-6);
+      margin-bottom:    var(--space-4);
+    }
+
+    .sidebar-card__title {
+      font-family:    var(--font-sans);
+      font-size:      var(--text-xs);
+      font-weight:    var(--weight-semibold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color:          var(--color-text-muted);
+      margin-bottom:  var(--space-4);
+    }
+
+    .info-row {
+      display:        flex;
+      flex-direction: column;
+      gap:            var(--space-1);
+      padding-bottom: var(--space-4);
+      margin-bottom:  var(--space-4);
+      border-bottom:  1px solid var(--color-border);
+    }
+
+    .info-row:last-child {
+      border-bottom:  none;
+      margin-bottom:  0;
+      padding-bottom: 0;
+    }
+
+    .info-row__label {
+      font-family:    var(--font-sans);
+      font-size:      var(--text-xs);
+      color:          var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .info-row__value {
+      font-family: var(--font-serif);
+      font-size:   var(--text-sm);
+      color:       var(--color-text);
+    }
+
+    /* ── Navegación entre proyectos ── */
+    .project-nav {
+      display:       grid;
+      grid-template-columns: 1fr 1fr;
+      gap:           var(--space-4);
+      padding-top:   var(--space-12);
+      margin-top:    var(--space-12);
+      border-top:    1px solid var(--color-border);
+    }
+
+    .project-nav__item {
+      display:        flex;
+      flex-direction: column;
+      gap:            var(--space-1);
+      padding:        var(--space-5);
+      border:         1px solid var(--color-border);
+      border-radius:  var(--radius-lg);
+      transition:     border-color var(--transition-fast);
+    }
+
+    .project-nav__item:hover {
+      border-color: var(--color-accent);
+    }
+
+    .project-nav__item--next {
+      text-align: right;
+    }
+
+    .project-nav__dir {
+      font-family:    var(--font-sans);
+      font-size:      var(--text-xs);
+      color:          var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .project-nav__title {
+      font-family: var(--font-serif);
+      font-size:   var(--text-sm);
+      font-weight: var(--weight-semibold);
+      color:       var(--color-text);
+      transition:  color var(--transition-fast);
+    }
+
+    .project-nav__item:hover .project-nav__title {
+      color: var(--color-accent);
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .project-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .project-sidebar {
+        position: static;
+        order:    -1;         /* sidebar arriba en mobile */
+      }
+
+      .project-header {
+        padding-top:   var(--space-12);
+        margin-bottom: var(--space-10);
+      }
+
+      .project-header__title {
+        font-size: var(--text-3xl);
+      }
+
+      .project-nav {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════════
+       NAVEGACIÓN
+  ════════════════════════════════════════ -->
+  <nav class="nav" id="main-nav">
+    <div class="nav__inner">
+      <a href="../index.html" class="nav__logo">Marcelo Ixquiac</a>
+      <ul class="nav__links">
+        <li><a href="../about.html"    class="nav__link">Sobre mí</a></li>
+        <li><a href="../projects.html" class="nav__link active">Proyectos</a></li>
+        <li><a href="../blog.html"     class="nav__link">Blog</a></li>
+        <li><a href="../now.html"      class="nav__link">Ahora</a></li>
+        <li><a href="../contact.html"  class="nav__link">Contacto</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ════════════════════════════════════════
+       MAIN
+  ════════════════════════════════════════ -->
+  <main>
+    <div class="container" style="max-width: 1000px;">
+
+      <!-- ── CABECERA ──────────────────────────── -->
+      <header class="project-header">
+
+        <a href="../projects.html" class="project-header__back">
+          <span class="arrow">←</span> Todos los proyectos
+        </a>
+
+        <div class="project-header__tags">
+          <span class="tag">Python</span>
+          <span class="tag">NumPy</span>
+          <span class="tag">Matplotlib</span>
+          <span class="tag">Simulación</span>
+        </div>
+
+        <h1 class="project-header__title">
+          Simulación de la ecuación de onda
+        </h1>
+
+        <p class="project-header__desc">
+          Método de diferencias finitas para modelar la propagación de ondas
+          en medios con velocidad variable, con condiciones de contorno
+          absorbentes y análisis de estabilidad.
+        </p>
+
+      </header>
+
+      <!-- ── LAYOUT ────────────────────────────── -->
+      <div class="project-layout">
+
+        <!-- Contenido principal -->
+        <div class="project-content">
+
+          <!-- El problema físico -->
+          <p class="section-label" style="margin-bottom: var(--space-4);">El problema</p>
+          <p>
+            La ecuación de onda escalar en un medio no homogéneo describe la
+            propagación de perturbaciones en un campo donde la velocidad de
+            fase varía con la posición. El caso de velocidad constante tiene
+            solución analítica exacta (d'Alembert), pero en cuanto la
+            velocidad depende de x o t, los métodos numéricos se vuelven
+            necesarios.
+          </p>
+          <p>
+            El objetivo de este proyecto fue implementar un solucionador
+            robusto para la ecuación de onda 1D con velocidad variable,
+            entender los criterios de estabilidad del esquema elegido, e
+            implementar condiciones de contorno que absorban las ondas en
+            lugar de reflejarlas.
+          </p>
+
+          <!-- Figura placeholder -->
+          <div class="project-figure">
+            <div class="project-figure__img">
+              <!--
+                Reemplaza este bloque con:
+                <img src="../assets/wave-eq-resultado.png"
+                     alt="Propagación de onda en medio no homogéneo" />
+              -->
+              Imagen: propagación de onda en medio no homogéneo<br>
+              <span style="font-size: var(--text-xs); opacity:0.6;">
+                assets/wave-eq-resultado.png
+              </span>
+            </div>
+            <p class="project-figure__caption">
+              Evolución temporal de una onda gaussiana propagándose en un
+              medio donde la velocidad aumenta linealmente de izquierda a
+              derecha. Se observa la refracción y el cambio de amplitud.
+            </p>
+          </div>
+
+          <!-- Método -->
+          <div class="content-block">
+            <p class="section-label content-block__label">Método</p>
+            <p>
+              El esquema de diferencias finitas de segundo orden en espacio
+              y tiempo (esquema explícito estándar) es el punto de partida
+              natural. La discretización de la segunda derivada espacial con
+              diferencias centradas da un esquema condicionalmente estable,
+              cuya condición de estabilidad es el criterio de
+              Courant-Friedrichs-Lewy (CFL):
+            </p>
+
+            <blockquote>
+              El paso temporal Δt debe satisfacer Δt ≤ Δx / max(c),
+              donde c es la velocidad de fase. Si se viola este criterio,
+              el error numérico crece sin cota.
+            </blockquote>
+
+            <p>
+              Para las condiciones de contorno absorbentes utilicé capas
+              perfectamente adaptadas (PML), que introducen una región
+              amortiguadora en los bordes del dominio. La idea es que las
+              ondas que llegan al borde sean atenuadas antes de poder
+              reflejarse.
+            </p>
+
+            <h3>Estructura del código</h3>
+            <p>
+              El solucionador está organizado en tres módulos: uno para la
+              configuración del dominio y los parámetros, uno para el
+              avance temporal y uno para la visualización. El módulo
+              principal es deliberadamente simple:
+            </p>
+
+            <pre><code>import numpy as np
+from wave_solver import WaveSolver
+from pml         import apply_pml
+
+# Configuración del dominio
+nx, nt  = 500, 2000
+dx, dt  = 0.01, 0.005            # dt < dx/max(c) → CFL OK
+
+# Velocidad variable: aumenta linealmente
+x = np.linspace(0, nx*dx, nx)
+c = 1.0 + 0.5 * (x / x[-1])     # c ∈ [1.0, 1.5]
+
+# Condición inicial: pulso gaussiano centrado
+u0   = np.exp(-((x - 2.5)**2) / (2 * 0.1**2))
+u_tm1 = u0.copy()
+
+solver = WaveSolver(c, dx, dt, pml_width=20)
+u = solver.run(u0, u_tm1, nt)</code></pre>
+
+          </div>
+
+          <!-- Resultados -->
+          <div class="content-block">
+            <p class="section-label content-block__label">Resultados</p>
+            <p>
+              El solucionador reproduce correctamente el comportamiento
+              esperado: la onda se acelera al entrar en la región de mayor
+              velocidad, la amplitud disminuye por conservación de energía
+              y las condiciones PML eliminan más del 99% de la reflexión en
+              los bordes.
+            </p>
+            <p>
+              La comparación con la solución analítica en el caso de
+              velocidad constante muestra un error de segundo orden en el
+              paso de discretización, consistente con el esquema utilizado.
+            </p>
+          </div>
+
+          <!-- Lo que aprendí -->
+          <div class="content-block">
+            <p class="section-label content-block__label">Lo que aprendí</p>
+            <p>
+              El criterio CFL no es solo una condición técnica de
+              estabilidad — tiene un significado físico preciso: el paso
+              temporal no puede ser mayor que el tiempo que tarda la onda
+              en cruzar una celda. Cuando se viola, el esquema numérico
+              intenta propagar información más rápido que la velocidad
+              física del sistema, y eso es fundamentalmente incorrecto.
+            </p>
+            <p>
+              La implementación de PML me obligó a entender las ecuaciones
+              de Maxwell en medios absorbentes, aunque el problema era
+              acústico. La misma técnica funciona en ambos casos, lo que
+              sugiere que hay algo más profundo sobre la estructura de las
+              ecuaciones de onda.
+            </p>
+          </div>
+
+          <!-- Navegación entre proyectos -->
+          <nav class="project-nav">
+            <a href="pendulum-data.html" class="project-nav__item">
+              <span class="project-nav__dir">← Anterior</span>
+              <span class="project-nav__title">
+                Análisis de datos del péndulo
+              </span>
+            </a>
+            <a href="nbody.html" class="project-nav__item project-nav__item--next">
+              <span class="project-nav__dir">Siguiente →</span>
+              <span class="project-nav__title">
+                Integrador de N cuerpos
+              </span>
+            </a>
+          </nav>
+
+        </div><!-- /project-content -->
+
+        <!-- Sidebar -->
+        <aside class="project-sidebar">
+
+          <!-- Repositorio -->
+          <div class="sidebar-card">
+            <p class="sidebar-card__title">Repositorio</p>
+            <a href="https://github.com/tuusuario/wave-equation"
+               target="_blank"
+               class="cta"
+               style="font-size: var(--text-sm);">
+              Ver en GitHub <span class="arrow">→</span>
+            </a>
+          </div>
+
+          <!-- Detalles -->
+          <div class="sidebar-card">
+            <p class="sidebar-card__title">Detalles</p>
+            <div class="info-row">
+              <span class="info-row__label">Contexto</span>
+              <span class="info-row__value">Curso de Física Computacional</span>
+            </div>
+            <div class="info-row">
+              <span class="info-row__label">Año</span>
+              <span class="info-row__value">2024</span>
+            </div>
+            <div class="info-row">
+              <span class="info-row__label">Estado</span>
+              <span class="info-row__value">Completo</span>
+            </div>
+          </div>
+
+          <!-- Stack -->
+          <div class="sidebar-card">
+            <p class="sidebar-card__title">Stack</p>
+            <div style="display: flex; flex-wrap: wrap; gap: var(--space-2);">
+              <span class="tag">Python 3.11</span>
+              <span class="tag">NumPy</span>
+              <span class="tag">Matplotlib</span>
+              <span class="tag">FFmpeg</span>
+            </div>
+          </div>
+
+          <!-- Conceptos -->
+          <div class="sidebar-card">
+            <p class="sidebar-card__title">Conceptos clave</p>
+            <div style="display: flex; flex-direction: column; gap: var(--space-2);">
+              <span style="font-family: var(--font-sans); font-size: var(--text-sm); color: var(--color-text-muted);">Criterio CFL</span>
+              <span style="font-family: var(--font-sans); font-size: var(--text-sm); color: var(--color-text-muted);">Diferencias finitas</span>
+              <span style="font-family: var(--font-sans); font-size: var(--text-sm); color: var(--color-text-muted);">PML absorbentes</span>
+              <span style="font-family: var(--font-sans); font-size: var(--text-sm); color: var(--color-text-muted);">Análisis de estabilidad</span>
+              <span style="font-family: var(--font-sans); font-size: var(--text-sm); color: var(--color-text-muted);">Orden de convergencia</span>
+            </div>
+          </div>
+
+        </aside>
+
+      </div><!-- /project-layout -->
+
+      <div style="height: var(--space-24);"></div>
+
+    </div><!-- /container -->
+  </main>
+
+  <!-- ════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <p class="footer__copy">Marcelo Ixquiac &copy; 2025</p>
+      <div class="footer__links">
+        <a href="mailto:tu@email.com"             class="footer__link">Email</a>
+        <a href="https://github.com/tuusuario"     class="footer__link" target="_blank">GitHub</a>
+        <a href="https://linkedin.com/in/tuperfil" class="footer__link" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true });
+  </script>
+
+</body>
+</html>

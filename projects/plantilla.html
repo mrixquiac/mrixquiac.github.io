@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PLANTILLA — Página de proyecto individual                   ║
+  ║                                                              ║
+  ║  Instrucciones generales:                                    ║
+  ║  1. Copia este archivo a la carpeta projects/                ║
+  ║  2. Renómbralo con el slug del proyecto (ej: nbody.html)     ║
+  ║  3. Busca cada bloque marcado con ✏️ y reemplaza el texto    ║
+  ║  4. Agrega la entrada en projects.json                       ║
+  ║  5. Pon los archivos en projectsfiles/plantilla/ (ver estructura abajo)       ║
+  ║                                                              ║
+  ║  Estructura de carpetas esperada:                            ║
+  ║  tu-sitio/                                                   ║
+  ║  ├── style.css                                               ║
+  ║  ├── projects.json                                           ║
+  ║  ├── projects/                                               ║
+  ║  │   └── slug-proyecto.html  ← este archivo renombrado      ║
+  ║  └── projectsfiles/plantilla/                                                 ║
+  ║      └── slug-proyecto/      ← misma nombre que el .html    ║
+  ║          ├── informe.pdf     ← siempre se llama informe.pdf ║
+  ║          ├── script.py       ← tus archivos aquí            ║
+  ║          └── datos.csv                                       ║
+  ╚══════════════════════════════════════════════════════════════╝
+  -->
+
+  <!-- ✏️ Cambia el título de la pestaña del navegador -->
+  <title>Título del proyecto — Marcelo Ixquiac</title>
+  <meta name="description" content="✏️ Descripción breve del proyecto para buscadores." />
+
+  <link rel="stylesheet" href="../style.css" />
+
+  <style>
+
+    /* ── Cabecera ── */
+    .project-header {
+      padding-top:    var(--space-20);
+      padding-bottom: var(--space-12);
+      border-bottom:  1px solid var(--color-border);
+      margin-bottom:  var(--space-12);
+    }
+
+    .project-header__back {
+      display:       inline-flex;
+      align-items:   center;
+      gap:           var(--space-2);
+      font-family:   var(--font-sans);
+      font-size:     var(--text-sm);
+      color:         var(--color-text-muted);
+      margin-bottom: var(--space-8);
+      transition:    color var(--transition-fast);
+    }
+
+    .project-header__back:hover { color: var(--color-accent); }
+    .project-header__back:hover .arrow { transform: translateX(-3px); }
+    .project-header__back .arrow { transition: transform var(--transition-fast); }
+
+    .project-header__tags {
+      display:       flex;
+      flex-wrap:     wrap;
+      gap:           var(--space-2);
+      margin-bottom: var(--space-5);
+    }
+
+    .project-header__title {
+      font-size:      var(--text-4xl);
+      letter-spacing: -0.025em;
+      margin-bottom:  var(--space-5);
+      line-height:    var(--leading-tight);
+    }
+
+    .project-header__desc {
+      font-size:   var(--text-lg);
+      line-height: var(--leading-relaxed);
+      color:       var(--color-text-muted);
+      max-width:   600px;
+      font-style:  italic;
+    }
+
+    /* ── Layout principal ── */
+    .project-layout {
+      display:               grid;
+      grid-template-columns: 1fr 240px;
+      gap:                   var(--space-16);
+      align-items:           start;
+    }
+
+    /* ── Contenido ── */
+    .project-content {
+      font-family: var(--font-serif);
+      font-size:   var(--text-md);
+      line-height: var(--leading-relaxed);
+    }
+
+    .project-content p { margin-bottom: var(--space-6); }
+    .project-content p:last-child { margin-bottom: 0; }
+
+    .project-content h2 {
+      font-size:      var(--text-2xl);
+      letter-spacing: -0.015em;
+      margin-top:     var(--space-12);
+      margin-bottom:  var(--space-4);
+    }
+
+    .project-content h3 {
+      font-size:      var(--text-xl);
+      letter-spacing: -0.01em;
+      margin-top:     var(--space-8);
+      margin-bottom:  var(--space-3);
+    }
+
+    .project-content code {
+      font-family:   'Courier New', Courier, monospace;
+      font-size:     0.88em;
+      background:    var(--color-accent-light);
+      color:         var(--color-accent);
+      padding:       0.1em 0.35em;
+      border-radius: var(--radius-sm);
+    }
+
+    .project-content pre {
+      background:    #F1F3F7;
+      border:        1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding:       var(--space-6);
+      margin:        var(--space-8) 0;
+      overflow-x:    auto;
+    }
+
+    .project-content pre code {
+      background:  none;
+      color:       var(--color-text);
+      padding:     0;
+      font-size:   var(--text-sm);
+      line-height: 1.65;
+    }
+
+    .project-content blockquote {
+      border-left:  3px solid var(--color-accent);
+      padding-left: var(--space-6);
+      margin:       var(--space-8) 0;
+      color:        var(--color-text-muted);
+      font-style:   italic;
+    }
+
+    /* Bloque de sección */
+    .content-block {
+      padding-top: var(--space-10);
+      margin-top:  var(--space-10);
+      border-top:  1px solid var(--color-border);
+    }
+
+    .content-block__label { margin-bottom: var(--space-5); }
+
+    /* ── Figura / imagen ── */
+    .project-figure {
+      background-color: var(--color-bg-pure);
+      border:           1px solid var(--color-border);
+      border-radius:    var(--radius-lg);
+      overflow:         hidden;
+      margin:           var(--space-8) 0;
+    }
+
+    .project-figure__img {
+      width:           100%;
+      display:         flex;
+      align-items:     center;
+      justify-content: center;
+      background:      var(--color-accent-light);
+      min-height:      180px;
+      font-family:     var(--font-sans);
+      font-size:       var(--text-sm);
+      color:           var(--color-text-muted);
+      padding:         var(--space-10);
+      text-align:      center;
+    }
+
+    .project-figure__caption {
+      padding:     var(--space-4) var(--space-6);
+      border-top:  1px solid var(--color-border);
+      font-family: var(--font-sans);
+      font-size:   var(--text-xs);
+      color:       var(--color-text-muted);
+      font-style:  italic;
+    }
+
+    /* ══════════════════════════════════════════
+       VISOR DE PDF
+    ══════════════════════════════════════════ */
+
+    .pdf-section {
+      padding-top: var(--space-10);
+      margin-top:  var(--space-10);
+      border-top:  1px solid var(--color-border);
+    }
+
+    .pdf-section__header {
+      display:       flex;
+      align-items:   center;
+      justify-content: space-between;
+      flex-wrap:     wrap;
+      gap:           var(--space-4);
+      margin-bottom: var(--space-6);
+    }
+
+    .pdf-section__title {
+      font-family: var(--font-serif);
+      font-size:   var(--text-xl);
+      font-weight: var(--weight-semibold);
+      color:       var(--color-text);
+    }
+
+    /* Botón de descarga del informe */
+    .btn-download {
+      display:        inline-flex;
+      align-items:    center;
+      gap:            var(--space-2);
+      font-family:    var(--font-sans);
+      font-size:      var(--text-sm);
+      font-weight:    var(--weight-medium);
+      color:          var(--color-accent);
+      border:         1px solid var(--color-accent);
+      border-radius:  var(--radius-md);
+      padding:        0.45em 1em;
+      transition:     background-color var(--transition-fast),
+                      color var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .btn-download:hover {
+      background-color: var(--color-accent);
+      color:            #fff;
+    }
+
+    /* Contenedor del iframe */
+    .pdf-viewer {
+      width:         100%;
+      border:        1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow:      hidden;
+      background:    #f0f0f0;
+    }
+
+    .pdf-viewer iframe {
+      width:   100%;
+      height:  680px;
+      border:  none;
+      display: block;
+    }
+
+    /* Mensaje de fallback si el navegador no soporta el visor */
+    .pdf-fallback {
+      display:         none;
+      padding:         var(--space-10);
+      text-align:      center;
+      font-family:     var(--font-sans);
+      font-size:       var(--text-sm);
+      color:           var(--color-text-muted);
+      line-height:     var(--leading-relaxed);
+    }
+
+    /* ══════════════════════════════════════════
+       ARCHIVOS RELACIONADOS
+    ══════════════════════════════════════════ */
+
+    .files-section {
+      padding-top: var(--space-10);
+      margin-top:  var(--space-10);
+      border-top:  1px solid var(--color-border);
+    }
+
+    .files-section__title {
+      font-family:   var(--font-serif);
+      font-size:     var(--text-xl);
+      font-weight:   var(--weight-semibold);
+      margin-bottom: var(--space-6);
+    }
+
+    .files-list {
+      display:        flex;
+      flex-direction: column;
+      gap:            0;
+    }
+
+    /* Cada archivo como fila */
+    .file-row {
+      display:     flex;
+      align-items: center;
+      justify-content: space-between;
+      gap:         var(--space-4);
+      padding:     var(--space-4) 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .file-row:first-child { border-top: 1px solid var(--color-border); }
+
+    .file-row__info {
+      display:     flex;
+      align-items: center;
+      gap:         var(--space-4);
+      min-width:   0;
+    }
+
+    /* Ícono del tipo de archivo */
+    .file-icon {
+      width:           36px;
+      height:          36px;
+      border-radius:   var(--radius-md);
+      display:         flex;
+      align-items:     center;
+      justify-content: center;
+      font-family:     var(--font-sans);
+      font-size:       0.6rem;
+      font-weight:     var(--weight-bold);
+      letter-spacing:  0.04em;
+      flex-shrink:     0;
+    }
+
+    .file-icon--py  { background: #EEF2F8; color: var(--color-accent); }
+    .file-icon--csv { background: #ECFDF5; color: #065F46; }
+    .file-icon--zip { background: #FEF9C3; color: #713F12; }
+    .file-icon--nb  { background: #FFF7ED; color: #9A3412; }
+    .file-icon--pdf { background: #FEF2F2; color: #991B1B; }
+    .file-icon--cpp { background: #EDE9FE; color: #4C1D95; }
+    .file-icon--txt { background: #F3F4F6; color: #374151; }
+
+    .file-row__name {
+      font-family:   var(--font-serif);
+      font-size:     var(--text-sm);
+      font-weight:   var(--weight-semibold);
+      color:         var(--color-text);
+      white-space:   nowrap;
+      overflow:      hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-row__desc {
+      font-family: var(--font-sans);
+      font-size:   var(--text-xs);
+      color:       var(--color-text-muted);
+      white-space: nowrap;
+      overflow:    hidden;
+      text-overflow: ellipsis;
+    }
+
+    .file-row__meta {
+      display:     flex;
+      align-items: center;
+      gap:         var(--space-4);
+      flex-shrink: 0;
+    }
+
+    .file-row__size {
+      font-family: var(--font-sans);
+      font-size:   var(--text-xs);
+      color:       var(--color-text-muted);
+    }
+
+    .file-row__download {
+      display:        inline-flex;
+      align-items:    center;
+      gap:            var(--space-1);
+      font-family:    var(--font-sans);
+      font-size:      var(--text-xs);
+      font-weight:    var(--weight-medium);
+      color:          var(--color-accent);
+      padding:        0.3em 0.7em;
+      border:         1px solid var(--color-border);
+      border-radius:  var(--radius-sm);
+      transition:     border-color var(--transition-fast),
+                      background-color var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .file-row__download:hover {
+      border-color:    var(--color-accent);
+      background-color: var(--color-accent-light);
+    }
+
+    /* ── Sidebar ── */
+    .project-sidebar {
+      position: sticky;
+      top:      calc(64px + var(--space-8));
+    }
+
+    .sidebar-card {
+      background-color: var(--color-bg-pure);
+      border:           1px solid var(--color-border);
+      border-radius:    var(--radius-lg);
+      padding:          var(--space-6);
+      margin-bottom:    var(--space-4);
+    }
+
+    .sidebar-card__title {
+      font-family:    var(--font-sans);
+      font-size:      var(--text-xs);
+      font-weight:    var(--weight-semibold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color:          var(--color-text-muted);
+      margin-bottom:  var(--space-4);
+    }
+
+    .info-row {
+      display:        flex;
+      flex-direction: column;
+      gap:            var(--space-1);
+      padding-bottom: var(--space-4);
+      margin-bottom:  var(--space-4);
+      border-bottom:  1px solid var(--color-border);
+    }
+
+    .info-row:last-child {
+      border-bottom:  none;
+      margin-bottom:  0;
+      padding-bottom: 0;
+    }
+
+    .info-row__label {
+      font-family:    var(--font-sans);
+      font-size:      var(--text-xs);
+      color:          var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .info-row__value {
+      font-family: var(--font-serif);
+      font-size:   var(--text-sm);
+      color:       var(--color-text);
+    }
+
+    /* ── Navegación entre proyectos ── */
+    .project-nav {
+      display:       grid;
+      grid-template-columns: 1fr 1fr;
+      gap:           var(--space-4);
+      padding-top:   var(--space-12);
+      margin-top:    var(--space-12);
+      border-top:    1px solid var(--color-border);
+    }
+
+    .project-nav__item {
+      display:        flex;
+      flex-direction: column;
+      gap:            var(--space-1);
+      padding:        var(--space-5);
+      border:         1px solid var(--color-border);
+      border-radius:  var(--radius-lg);
+      transition:     border-color var(--transition-fast);
+      text-decoration: none;
+    }
+
+    .project-nav__item:hover { border-color: var(--color-accent); }
+    .project-nav__item--next { text-align: right; }
+
+    .project-nav__dir {
+      font-family:    var(--font-sans);
+      font-size:      var(--text-xs);
+      color:          var(--color-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .project-nav__title {
+      font-family: var(--font-serif);
+      font-size:   var(--text-sm);
+      font-weight: var(--weight-semibold);
+      color:       var(--color-text);
+      transition:  color var(--transition-fast);
+    }
+
+    .project-nav__item:hover .project-nav__title { color: var(--color-accent); }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .project-layout { grid-template-columns: 1fr; }
+      .project-sidebar { position: static; order: -1; }
+      .project-header { padding-top: var(--space-12); margin-bottom: var(--space-10); }
+      .project-header__title { font-size: var(--text-3xl); }
+      .project-nav { grid-template-columns: 1fr; }
+      .pdf-viewer iframe { height: 420px; }
+      .file-row__size { display: none; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ════════════════════════════════════
+       NAVEGACIÓN
+  ════════════════════════════════════ -->
+  <nav class="nav" id="main-nav">
+    <div class="nav__inner">
+      <a href="../index.html" class="nav__logo">Marcelo Ixquiac</a>
+      <ul class="nav__links">
+        <li><a href="../about.html"    class="nav__link">Sobre mí</a></li>
+        <li><a href="../projects.html" class="nav__link active">Proyectos</a></li>
+        <li><a href="../blog.html"     class="nav__link">Blog</a></li>
+        <li><a href="../now.html"      class="nav__link">Ahora</a></li>
+        <li><a href="../contact.html"  class="nav__link">Contacto</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container" style="max-width: 1000px;">
+
+      <!-- ════════════════════════════════════
+           CABECERA DEL PROYECTO
+           ✏️ Rellena título, tags y descripción
+      ════════════════════════════════════ -->
+      <header class="project-header">
+
+        <a href="../projects.html" class="project-header__back">
+          <span class="arrow">←</span> Todos los proyectos
+        </a>
+
+        <!--
+          ✏️ ETIQUETAS
+          Pon aquí las tecnologías principales del proyecto.
+          Usa solo las más relevantes (3 a 5 máximo).
+          Ejemplos: Python, NumPy, C++, Julia, SciPy, LaTeX, etc.
+        -->
+        <div class="project-header__tags">
+          <span class="tag">✏️ Tecnología 1</span>
+          <span class="tag">✏️ Tecnología 2</span>
+          <span class="tag">✏️ Categoría</span>
+        </div>
+
+        <!-- ✏️ TÍTULO DEL PROYECTO -->
+        <h1 class="project-header__title">
+          ✏️ Título completo del proyecto
+        </h1>
+
+        <!--
+          ✏️ DESCRIPCIÓN BREVE (subtítulo en cursiva)
+          Una o dos líneas que expliquen de qué trata el proyecto.
+          No copies el título — amplíalo o añade el enfoque.
+        -->
+        <p class="project-header__desc">
+          ✏️ Descripción breve del proyecto: qué problema resuelve y
+          qué método se usó. Una o dos oraciones, tono neutro.
+        </p>
+
+      </header>
+
+      <!-- ════════════════════════════════════
+           LAYOUT: CONTENIDO + SIDEBAR
+      ════════════════════════════════════ -->
+      <div class="project-layout">
+
+        <!-- ── COLUMNA PRINCIPAL ─────────────────────────────── -->
+        <div class="project-content">
+
+          <!-- ════════════════════════════════
+               EL PROBLEMA FÍSICO
+               ✏️ Explica el contexto antes del método.
+               Esta sección es la más importante:
+               demuestra que entiendes el fenómeno,
+               no solo que sabes programar.
+          ════════════════════════════════ -->
+          <p class="section-label" style="margin-bottom: var(--space-4);">El problema</p>
+
+          <p>
+            ✏️ Describe el fenómeno físico que motivó el proyecto.
+            ¿Qué pregunta querías responder? ¿Por qué es interesante
+            o difícil de resolver analíticamente?
+          </p>
+
+          <p>
+            ✏️ Segundo párrafo: ¿qué objetivos concretos te propusiste?
+            Sé específico. En lugar de "estudié la ecuación X", escribe
+            "quería calcular Y bajo la condición Z y verificar que
+            coincide con el resultado analítico para el caso límite W".
+          </p>
+
+          <!--
+            FIGURA / IMAGEN (opcional pero recomendada)
+            ✏️ Pon aquí la imagen más representativa del proyecto:
+               un gráfico de resultados, una visualización, un diagrama.
+            ✏️ Crea la carpeta projectsfiles/plantilla/ en la raíz del sitio y
+               guarda la imagen ahí.
+            ✏️ Ruta desde esta página: ../projectsfiles/plantilla/nombre-imagen.png
+          -->
+          <div class="project-figure">
+            <div class="project-figure__img">
+              <!--
+                ✏️ Cuando tengas la imagen, reemplaza este bloque completo con:
+                <img src="../projectsfiles/plantilla/nombre-imagen.png"
+                     alt="✏️ Descripción de la imagen para accesibilidad" />
+              -->
+              ✏️ Imagen del proyecto<br>
+              <span style="font-size:var(--text-xs);opacity:0.6;">
+                Ruta: ../projectsfiles/plantilla/nombre-imagen.png
+              </span>
+            </div>
+            <p class="project-figure__caption">
+              ✏️ Pie de figura: explica qué muestra la imagen, qué
+              representan los ejes o colores, y qué conclusión se puede
+              leer directamente de ella.
+            </p>
+          </div>
+
+          <!-- ════════════════════════════════
+               MÉTODO
+               ✏️ Explica el enfoque técnico.
+               Si usas código, muestra el fragmento
+               más representativo, no todo el proyecto.
+          ════════════════════════════════ -->
+          <div class="content-block">
+            <p class="section-label content-block__label">Método</p>
+
+            <p>
+              ✏️ Describe el método o algoritmo principal que usaste.
+              Explica por qué elegiste ese enfoque y no otro. Menciona
+              las limitaciones o condiciones del método.
+            </p>
+
+            <!--
+              FRAGMENTO DE CÓDIGO (opcional)
+              ✏️ Muestra solo el fragmento más representativo.
+              No copies todo el archivo — pon el núcleo del algoritmo.
+            -->
+            <pre><code>✏️ # Fragmento de código representativo
+✏️ # Muestra el núcleo del algoritmo, no todo el proyecto
+
+def nombre_funcion(parametro_1, parametro_2):
+    """✏️ Docstring: qué hace esta función."""
+    # ✏️ Líneas clave del algoritmo
+    resultado = parametro_1 + parametro_2
+    return resultado</code></pre>
+
+            <p>
+              ✏️ Párrafo explicando el código de arriba: qué hace cada
+              parte relevante, qué decisiones de implementación tomaste
+              y por qué.
+            </p>
+
+          </div>
+
+          <!-- ════════════════════════════════
+               RESULTADOS
+               ✏️ Presenta los resultados con números
+               concretos. Evita "los resultados fueron
+               buenos" — di qué valor obtuviste y cómo
+               se compara con la referencia teórica.
+          ════════════════════════════════ -->
+          <div class="content-block">
+            <p class="section-label content-block__label">Resultados</p>
+
+            <p>
+              ✏️ Describe los resultados principales con números concretos.
+              Ejemplo: "El error relativo entre la solución numérica y la
+              analítica es menor al 0.5% para Δx = 0.01."
+            </p>
+
+            <p>
+              ✏️ Si los resultados no fueron los esperados, explica por qué
+              y qué aprendiste de eso. Los resultados inesperados bien
+              explicados son más valiosos que resultados perfectos sin
+              explicación.
+            </p>
+
+          </div>
+
+          <!-- ════════════════════════════════
+               LO QUE APRENDÍ
+               ✏️ La sección más honesta y más valiosa.
+               No repitas los resultados — explica
+               qué entendiste que antes no entendías.
+          ════════════════════════════════ -->
+          <div class="content-block">
+            <p class="section-label content-block__label">Lo que aprendí</p>
+
+            <p>
+              ✏️ Reflexión sobre el proyecto: ¿qué concepto entendiste
+              mejor al implementarlo? ¿Qué error cometiste y cómo lo
+              detectaste? ¿Qué harías diferente si lo repitieras?
+            </p>
+
+            <p>
+              ✏️ Esta sección distingue tu portafolio del de alguien que
+              solo lista proyectos. No tiene que ser larga, pero sí honesta.
+            </p>
+
+          </div>
+
+          <!-- ════════════════════════════════
+               VISOR DE PDF — INFORME
+               ✏️ Pon el informe en:
+                  projectsfiles/plantilla/informes/slug-del-proyecto.pdf
+               ✏️ Cambia las dos rutas marcadas abajo.
+          ════════════════════════════════ -->
+          <div class="pdf-section">
+
+            <div class="pdf-section__header">
+              <h2 class="pdf-section__title">Informe</h2>
+
+              <!--
+                ✏️ Ruta del informe:
+                   ../projectsfiles/plantilla/SLUG-DEL-PROYECTO/informe.pdf
+                   El slug es el mismo nombre que este archivo HTML
+                   sin la extensión. Ejemplo: si este archivo es
+                   wave-equation.html, la ruta es:
+                   ../projectsfiles/plantilla/wave-equation/informe.pdf
+
+                ✏️ Cambia solo el SLUG en los tres lugares marcados.
+              -->
+              <a href="../projectsfiles/plantilla/relatividad_presentacion.pdf"
+                 download="Informe — ✏️ Título del proyecto.pdf"
+                 class="btn-download">
+                ↓ Descargar PDF
+              </a>
+            </div>
+
+            <div class="pdf-viewer" id="pdf-viewer">
+              <iframe
+                src="../projectsfiles/plantilla/relatividad_presentacion.pdf"
+                title="Informe del proyecto"
+                id="pdf-iframe">
+              </iframe>
+
+              <!-- Mensaje de respaldo si el iframe falla -->
+              <div class="pdf-fallback" id="pdf-fallback">
+                Tu navegador no puede mostrar el PDF en línea.<br>
+                <a href="../projectsfiles/plantilla/relatividad_presentacion.pdf"
+                   download class="cta" style="margin-top: var(--space-4);">
+                  Descárgalo aquí <span class="arrow">→</span>
+                </a>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ════════════════════════════════
+               ARCHIVOS RELACIONADOS
+               ✏️ Lista los archivos descargables del proyecto.
+               ✏️ Guárdalos en: projectsfiles/plantilla/archivos/
+               ✏️ Tipos de ícono disponibles:
+                  .file-icon--py   → Python
+                  .file-icon--csv  → CSV / datos
+                  .file-icon--zip  → ZIP
+                  .file-icon--nb   → Jupyter Notebook
+                  .file-icon--pdf  → PDF adicional
+                  .file-icon--cpp  → C++ / C
+                  .file-icon--txt  → TXT / README
+               ✏️ Copia o elimina filas según los archivos que tengas.
+          ════════════════════════════════ -->
+          <div class="files-section">
+            <h2 class="files-section__title">Archivos</h2>
+
+            <!--
+              ✏️ Ruta de todos los archivos:
+                 ../projectsfiles/plantilla/SLUG-DEL-PROYECTO/nombre-del-archivo.ext
+                 Ejemplo para wave-equation:
+                 ../projectsfiles/plantilla/wave-equation/wave_solver.py
+
+              ✏️ Copia o elimina filas según los archivos que tengas.
+
+              ✏️ Íconos disponibles según extensión:
+                 .file-icon--py   → .py  (Python)
+                 .file-icon--csv  → .csv (Datos)
+                 .file-icon--zip  → .zip (Comprimido)
+                 .file-icon--nb   → .ipynb (Jupyter)
+                 .file-icon--pdf  → .pdf (PDF adicional)
+                 .file-icon--cpp  → .cpp / .c (C++ / C)
+                 .file-icon--txt  → .txt / README
+            -->
+            <div class="files-list">
+
+              <!-- ARCHIVO 1 — Código principal -->
+              <div class="file-row">
+                <div class="file-row__info">
+                  <span class="file-icon file-icon--py">PY</span>
+                  <div>
+                    <p class="file-row__name">✏️ nombre_script.py</p>
+                    <p class="file-row__desc">✏️ Descripción breve: qué hace este archivo</p>
+                  </div>
+                </div>
+                <div class="file-row__meta">
+                  <span class="file-row__size">✏️ 12 KB</span>
+                  <a href="../projectsfiles/plantilla/otherfiles/✏️-nombre_script.py"
+                     download class="file-row__download">
+                    ↓ Descargar
+                  </a>
+                </div>
+              </div>
+
+              <!-- ARCHIVO 2 — Datos / CSV -->
+              <div class="file-row">
+                <div class="file-row__info">
+                  <span class="file-icon file-icon--csv">CSV</span>
+                  <div>
+                    <p class="file-row__name">✏️ datos.csv</p>
+                    <p class="file-row__desc">✏️ Datos crudos del experimento</p>
+                  </div>
+                </div>
+                <div class="file-row__meta">
+                  <span class="file-row__size">✏️ 48 KB</span>
+                  <a href="../projectsfiles/plantilla/otherfiles/✏️-datos.csv"
+                     download class="file-row__download">
+                    ↓ Descargar
+                  </a>
+                </div>
+              </div>
+
+              <!-- ARCHIVO 3 — Notebook -->
+              <div class="file-row">
+                <div class="file-row__info">
+                  <span class="file-icon file-icon--nb">NB</span>
+                  <div>
+                    <p class="file-row__name">✏️ analisis.ipynb</p>
+                    <p class="file-row__desc">✏️ Notebook con el análisis completo y gráficas</p>
+                  </div>
+                </div>
+                <div class="file-row__meta">
+                  <span class="file-row__size">✏️ 2.3 MB</span>
+                  <a href="../projectsfiles/plantilla/otherfiles/✏️-analisis.ipynb"
+                     download class="file-row__download">
+                    ↓ Descargar
+                  </a>
+                </div>
+              </div>
+
+              <!-- ARCHIVO 4 — ZIP con todo (opcional) -->
+              <div class="file-row">
+                <div class="file-row__info">
+                  <span class="file-icon file-icon--zip">ZIP</span>
+                  <div>
+                    <p class="file-row__name">✏️ proyecto-completo.zip</p>
+                    <p class="file-row__desc">✏️ Todos los archivos del proyecto comprimidos</p>
+                  </div>
+                </div>
+                <div class="file-row__meta">
+                  <span class="file-row__size">✏️ 3.1 MB</span>
+                  <a href="../projectsfiles/plantilla/otherfiles/✏️-proyecto-completo.zip"
+                     download class="file-row__download">
+                    ↓ Descargar
+                  </a>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- ════════════════════════════════
+               NAVEGACIÓN ENTRE PROYECTOS
+               ✏️ Pon los slugs del proyecto anterior y siguiente.
+               ✏️ Si es el primero, elimina el enlace "Anterior".
+               ✏️ Si es el último, elimina el enlace "Siguiente".
+          ════════════════════════════════ -->
+          <nav class="project-nav">
+            <a href="✏️-slug-anterior.html" class="project-nav__item">
+              <span class="project-nav__dir">← Anterior</span>
+              <span class="project-nav__title">✏️ Título del proyecto anterior</span>
+            </a>
+            <a href="✏️-slug-siguiente.html" class="project-nav__item project-nav__item--next">
+              <span class="project-nav__dir">Siguiente →</span>
+              <span class="project-nav__title">✏️ Título del proyecto siguiente</span>
+            </a>
+          </nav>
+
+        </div><!-- /project-content -->
+
+        <!-- ── SIDEBAR ───────────────────────────────────────── -->
+        <aside class="project-sidebar">
+
+          <!-- Repositorio -->
+          <div class="sidebar-card">
+            <p class="sidebar-card__title">Repositorio</p>
+            <!--
+              ✏️ Cambia el href por la URL real de tu repo en GitHub.
+              ✏️ Si el proyecto no tiene repo público, elimina esta tarjeta.
+            -->
+            <a href="https://github.com/tuusuario/✏️-nombre-repo"
+               target="_blank" class="cta" style="font-size:var(--text-sm);">
+              Ver en GitHub <span class="arrow">→</span>
+            </a>
+          </div>
+
+          <!-- Detalles -->
+          <div class="sidebar-card">
+            <p class="sidebar-card__title">Detalles</p>
+
+            <!-- ✏️ Cambia los valores de cada fila -->
+            <div class="info-row">
+              <span class="info-row__label">Contexto</span>
+              <span class="info-row__value">
+                ✏️ Ej: Curso de Física Computacional
+              </span>
+            </div>
+            <div class="info-row">
+              <span class="info-row__label">Año</span>
+              <span class="info-row__value">✏️ 2024</span>
+            </div>
+            <div class="info-row">
+              <span class="info-row__label">Estado</span>
+              <!--
+                ✏️ Opciones: Completo / En progreso / Pausado
+              -->
+              <span class="info-row__value">✏️ Completo</span>
+            </div>
+          </div>
+
+          <!-- Stack -->
+          <div class="sidebar-card">
+            <p class="sidebar-card__title">Stack</p>
+            <!--
+              ✏️ Pon aquí las versiones específicas que usaste.
+              Ejemplo: Python 3.11, NumPy 1.26, etc.
+            -->
+            <div style="display:flex;flex-wrap:wrap;gap:var(--space-2);">
+              <span class="tag">✏️ Python 3.11</span>
+              <span class="tag">✏️ NumPy</span>
+              <span class="tag">✏️ Herramienta 3</span>
+            </div>
+          </div>
+
+          <!-- Conceptos clave -->
+          <div class="sidebar-card">
+            <p class="sidebar-card__title">Conceptos clave</p>
+            <!--
+              ✏️ Lista los conceptos físicos o matemáticos centrales
+              del proyecto. 4 a 6 ítems es suficiente.
+            -->
+            <div style="display:flex;flex-direction:column;gap:var(--space-2);">
+              <span style="font-family:var(--font-sans);font-size:var(--text-sm);color:var(--color-text-muted);">
+                ✏️ Concepto 1
+              </span>
+              <span style="font-family:var(--font-sans);font-size:var(--text-sm);color:var(--color-text-muted);">
+                ✏️ Concepto 2
+              </span>
+              <span style="font-family:var(--font-sans);font-size:var(--text-sm);color:var(--color-text-muted);">
+                ✏️ Concepto 3
+              </span>
+              <span style="font-family:var(--font-sans);font-size:var(--text-sm);color:var(--color-text-muted);">
+                ✏️ Concepto 4
+              </span>
+            </div>
+          </div>
+
+        </aside>
+
+      </div><!-- /project-layout -->
+
+      <div style="height:var(--space-24);"></div>
+
+    </div><!-- /container -->
+  </main>
+
+  <!-- ════════════════════════════════════
+       FOOTER
+       ✏️ Cambia el nombre y los enlaces
+  ════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <p class="footer__copy">Marcelo Ixquiac &copy; 2025</p>
+      <div class="footer__links">
+        <a href="mailto:tu@email.com"             class="footer__link">Email</a>
+        <a href="https://github.com/tuusuario"     class="footer__link" target="_blank">GitHub</a>
+        <a href="https://linkedin.com/in/tuperfil" class="footer__link" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Nav scroll
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true });
+
+    // Si el iframe del PDF falla, mostrar el fallback
+    const iframe = document.getElementById('pdf-iframe');
+    if (iframe) {
+      iframe.addEventListener('error', () => {
+        iframe.style.display = 'none';
+        document.getElementById('pdf-fallback').style.display = 'block';
+      });
+    }
+  </script>
+
+</body>
+</html>

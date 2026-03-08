@@ -1,0 +1,29 @@
+[
+  {
+    "slug":        "olas-de-madrugada",
+    "titulo":      "Olas de madrugada",
+    "descripcion": "El mar a las 4am tiene una calma que no existe en ningún otro momento del día.",
+    "tipo":        "foto",
+    "archivo":     "foto.jpg",
+    "fecha":       "Ene 2025",
+    "destacado":   true
+  },
+  {
+    "slug":        "laboratorio-cuantica",
+    "titulo":      "Laboratorio de mecánica cuántica",
+    "descripcion": "Preparando el experimento de la doble rendija. Todo listo para la tarde.",
+    "tipo":        "foto",
+    "archivo":     "foto.jpg",
+    "fecha":       "Dic 2024",
+    "destacado":   false
+  },
+  {
+    "slug":        "ciudad-desde-arriba",
+    "titulo":      "La ciudad desde arriba",
+    "descripcion": "Grabado desde el edificio de ciencias. La ciudad parece un sistema de partículas.",
+    "tipo":        "video",
+    "archivo":     "video.mp4",
+    "fecha":       "Nov 2024",
+    "destacado":   false
+  }
+]

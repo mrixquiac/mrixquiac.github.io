@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ensayos — Marcelo Ixquiac</title>
+  <meta name="description" content="Reflexiones y ensayos sobre física, aprendizaje y pensamiento." />
+  <link rel="stylesheet" href="../../style.css" />
+  <style>
+
+    .page-header {
+      padding-top:    var(--space-20);
+      padding-bottom: var(--space-12);
+      border-bottom:  1px solid var(--color-border);
+      margin-bottom:  var(--space-16);
+    }
+
+    .page-header__back {
+      display:       inline-flex;
+      align-items:   center;
+      gap:           var(--space-2);
+      font-family:   var(--font-sans);
+      font-size:     var(--text-sm);
+      color:         var(--color-text-muted);
+      margin-bottom: var(--space-6);
+      transition:    color var(--transition-fast);
+    }
+
+    .page-header__back:hover { color: var(--color-accent); }
+    .page-header__back:hover .arrow { transform: translateX(-3px); }
+    .page-header__back .arrow { transition: transform var(--transition-fast); }
+
+    .page-header__title {
+      font-size:      var(--text-4xl);
+      letter-spacing: -0.025em;
+      margin-top:     var(--space-4);
+    }
+
+    /* ── Lista de ensayos ── */
+    .ensayos-list {
+      margin-bottom: var(--space-24);
+    }
+
+    .ensayo-item {
+      display:         grid;
+      grid-template-columns: 90px 1fr;
+      gap:             var(--space-6);
+      align-items:     start;
+      padding:         var(--space-8) 0;
+      border-bottom:   1px solid var(--color-border);
+      text-decoration: none;
+    }
+
+    .ensayo-item:first-child { border-top: 1px solid var(--color-border); }
+
+    .ensayo-item__date {
+      font-family: var(--font-sans);
+      font-size:   var(--text-sm);
+      color:       var(--color-text-muted);
+      padding-top: 0.25em;
+      line-height: var(--leading-snug);
+    }
+
+    .ensayo-item__title {
+      font-family:   var(--font-serif);
+      font-size:     var(--text-xl);
+      font-weight:   var(--weight-semibold);
+      color:         var(--color-text);
+      margin-bottom: var(--space-2);
+      line-height:   var(--leading-snug);
+      transition:    color var(--transition-fast);
+    }
+
+    .ensayo-item:hover .ensayo-item__title { color: var(--color-accent); }
+
+    .ensayo-item__excerpt {
+      font-family: var(--font-sans);
+      font-size:   var(--text-sm);
+      color:       var(--color-text-muted);
+      line-height: var(--leading-normal);
+    }
+
+    .ensayo-item__badge {
+      display:        inline-block;
+      font-family:    var(--font-sans);
+      font-size:      0.62rem;
+      font-weight:    var(--weight-semibold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color:          var(--color-accent);
+      border:         1px solid var(--color-accent);
+      border-radius:  100px;
+      padding:        0.15em 0.6em;
+      margin-bottom:  var(--space-2);
+      display:        inline-block;
+    }
+
+    @media (max-width: 768px) {
+      .page-header { padding-top: var(--space-12); }
+      .page-header__title { font-size: var(--text-3xl); }
+      .ensayo-item { grid-template-columns: 1fr; gap: var(--space-2); }
+      .ensayo-item__date { font-size: var(--text-xs); }
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav class="nav" id="main-nav">
+    <div class="nav__inner">
+      <a href="../../index.html" class="nav__logo">Marcelo Ixquiac</a>
+      <ul class="nav__links">
+        <li><a href="../../about.html"    class="nav__link">Sobre mí</a></li>
+        <li><a href="../../projects.html" class="nav__link">Proyectos</a></li>
+        <li><a href="../../blog.html"     class="nav__link active">Blog</a></li>
+        <li><a href="../../now.html"      class="nav__link">Ahora</a></li>
+        <li><a href="../../contact.html"  class="nav__link">Contacto</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container container--content">
+
+      <header class="page-header">
+        <a href="../../blog.html" class="page-header__back">
+          <span class="arrow">←</span> Blog
+        </a>
+        <p class="section-label">Blog · Ensayos</p>
+        <h1 class="page-header__title">Ensayos</h1>
+      </header>
+
+      <div class="ensayos-list" id="ensayos-list"></div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <p class="footer__copy">Marcelo Ixquiac &copy; 2025</p>
+      <div class="footer__links">
+        <a href="mailto:tu@email.com"             class="footer__link">Email</a>
+        <a href="https://github.com/tuusuario"     class="footer__link" target="_blank">GitHub</a>
+        <a href="https://linkedin.com/in/tuperfil" class="footer__link" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true });
+
+    fetch('ensayos.json')
+      .then(r => r.json())
+      .then(ensayos => {
+        const list   = document.getElementById('ensayos-list');
+        const sorted = ensayos.filter(e => e.destacado)
+          .concat(ensayos.filter(e => !e.destacado));
+
+        sorted.forEach(e => {
+          const a = document.createElement('a');
+          a.href      = `${e.slug}/index.html`;
+          a.className = 'ensayo-item';
+          a.innerHTML = `
+            <span class="ensayo-item__date">${e.fecha}</span>
+            <div>
+              ${e.destacado ? '<span class="ensayo-item__badge">Destacado</span>' : ''}
+              <p class="ensayo-item__title">${e.titulo}</p>
+              <p class="ensayo-item__excerpt">${e.extracto}</p>
+            </div>`;
+          list.appendChild(a);
+        });
+      })
+      .catch(() => {
+        document.getElementById('ensayos-list').innerHTML =
+          `<p style="font-family:var(--font-sans);font-size:var(--text-sm);
+           color:var(--color-text-muted);">
+           Usa <code>python -m http.server</code> para ver el contenido.</p>`;
+      });
+  </script>
+
+</body>
+</html>

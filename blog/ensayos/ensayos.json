@@ -1,0 +1,23 @@
+[
+  {
+    "slug":      "sobre-la-belleza-en-fisica",
+    "titulo":    "Sobre la belleza en física",
+    "extracto":  "Qué significa que una ecuación sea hermosa y por qué eso importa más de lo que parece.",
+    "fecha":     "Ene 2025",
+    "destacado": true
+  },
+  {
+    "slug":      "aprender-a-equivocarse",
+    "titulo":    "Aprender a equivocarse bien",
+    "extracto":  "El error como parte del método. Reflexión sobre cómo el laboratorio enseña cosas que el aula no puede.",
+    "fecha":     "Dic 2024",
+    "destacado": false
+  },
+  {
+    "slug":      "modelos-y-realidad",
+    "titulo":    "Modelos y realidad",
+    "extracto":  "Todos los modelos están equivocados, pero algunos son útiles. Sobre los límites del pensamiento físico.",
+    "fecha":     "Nov 2024",
+    "destacado": false
+  }
+]

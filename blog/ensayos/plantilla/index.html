@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!--
+  ╔════════════════════════════════════════════════════════════╗
+  ║  PLANTILLA — Ensayo individual                            ║
+  ║                                                           ║
+  ║  1. Crea una carpeta en blog/ensayos/ con el slug         ║
+  ║     Ejemplo: blog/ensayos/sobre-la-belleza-en-fisica/     ║
+  ║  2. Pon el PDF dentro: ensayo.pdf  (siempre ese nombre)   ║
+  ║  3. Copia este archivo a esa carpeta como index.html      ║
+  ║  4. Rellena los ✏️ con el contenido del ensayo            ║
+  ║  5. Agrega la entrada en blog/ensayos/ensayos.json        ║
+  ║                                                           ║
+  ║  Campos en ensayos.json:                                  ║
+  ║  {                                                        ║
+  ║    "slug":      "nombre-de-la-carpeta",                   ║
+  ║    "titulo":    "Título del ensayo",                      ║
+  ║    "extracto":  "Resumen breve (aparece en el índice)",   ║
+  ║    "fecha":     "Ene 2025",                               ║
+  ║    "destacado": false                                     ║
+  ║  }                                                        ║
+  ╚════════════════════════════════════════════════════════════╝
+  -->
+
+  <!-- ✏️ Título de la pestaña -->
+  <title>✏️ Título del ensayo — Marcelo Ixquiac</title>
+  <meta name="description" content="✏️ Extracto o descripción breve del ensayo." />
+
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+
+    .essay-header {
+      padding-top:    var(--space-20);
+      padding-bottom: var(--space-10);
+      border-bottom:  1px solid var(--color-border);
+      margin-bottom:  var(--space-12);
+    }
+
+    .essay-header__back {
+      display:       inline-flex;
+      align-items:   center;
+      gap:           var(--space-2);
+      font-family:   var(--font-sans);
+      font-size:     var(--text-sm);
+      color:         var(--color-text-muted);
+      margin-bottom: var(--space-8);
+      transition:    color var(--transition-fast);
+    }
+
+    .essay-header__back:hover { color: var(--color-accent); }
+    .essay-header__back:hover .arrow { transform: translateX(-3px); }
+    .essay-header__back .arrow { transition: transform var(--transition-fast); }
+
+    .essay-header__meta {
+      display:       flex;
+      align-items:   center;
+      gap:           var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+
+    .essay-header__fecha {
+      font-family: var(--font-sans);
+      font-size:   var(--text-sm);
+      color:       var(--color-text-muted);
+    }
+
+    .essay-header__title {
+      font-size:      var(--text-4xl);
+      letter-spacing: -0.025em;
+      line-height:    var(--leading-tight);
+      margin-bottom:  var(--space-5);
+    }
+
+    .essay-header__extracto {
+      font-family: var(--font-serif);
+      font-size:   var(--text-lg);
+      color:       var(--color-text-muted);
+      font-style:  italic;
+      max-width:   580px;
+      line-height: var(--leading-relaxed);
+    }
+
+    /* ── Visor PDF ── */
+    .pdf-section {
+      margin-bottom: var(--space-16);
+    }
+
+    .pdf-section__header {
+      display:         flex;
+      align-items:     center;
+      justify-content: space-between;
+      flex-wrap:       wrap;
+      gap:             var(--space-4);
+      margin-bottom:   var(--space-6);
+    }
+
+    .pdf-section__title {
+      font-family: var(--font-serif);
+      font-size:   var(--text-xl);
+      font-weight: var(--weight-semibold);
+    }
+
+    .btn-download {
+      display:         inline-flex;
+      align-items:     center;
+      gap:             var(--space-2);
+      font-family:     var(--font-sans);
+      font-size:       var(--text-sm);
+      font-weight:     var(--weight-medium);
+      color:           var(--color-accent);
+      border:          1px solid var(--color-accent);
+      border-radius:   var(--radius-md);
+      padding:         0.45em 1em;
+      text-decoration: none;
+      transition:      background-color var(--transition-fast),
+                       color var(--transition-fast);
+    }
+
+    .btn-download:hover {
+      background-color: var(--color-accent);
+      color:            #fff;
+    }
+
+    .pdf-viewer {
+      width:         100%;
+      border:        1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow:      hidden;
+      background:    #f0f0f0;
+    }
+
+    .pdf-viewer iframe {
+      width:   100%;
+      height:  720px;
+      border:  none;
+      display: block;
+    }
+
+    .pdf-fallback {
+      display:         none;
+      padding:         var(--space-10);
+      text-align:      center;
+      font-family:     var(--font-sans);
+      font-size:       var(--text-sm);
+      color:           var(--color-text-muted);
+      line-height:     var(--leading-relaxed);
+    }
+
+    /* ── Nota introductoria (opcional) ── */
+    .essay-note {
+      font-family:   var(--font-serif);
+      font-size:     var(--text-md);
+      line-height:   var(--leading-relaxed);
+      color:         var(--color-text);
+      max-width:     var(--width-blog);
+      margin-bottom: var(--space-10);
+    }
+
+    .essay-note p { margin-bottom: var(--space-5); }
+    .essay-note p:last-child { margin-bottom: 0; }
+
+    @media (max-width: 768px) {
+      .essay-header { padding-top: var(--space-12); }
+      .essay-header__title { font-size: var(--text-3xl); }
+      .pdf-viewer iframe { height: 480px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav class="nav" id="main-nav">
+    <div class="nav__inner">
+      <a href="../../../index.html" class="nav__logo">Marcelo Ixquiac</a>
+      <ul class="nav__links">
+        <li><a href="../../../about.html"    class="nav__link">Sobre mí</a></li>
+        <li><a href="../../../projects.html" class="nav__link">Proyectos</a></li>
+        <li><a href="../../../blog.html"     class="nav__link active">Blog</a></li>
+        <li><a href="../../../now.html"      class="nav__link">Ahora</a></li>
+        <li><a href="../../../contact.html"  class="nav__link">Contacto</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container container--content">
+
+      <!-- ── CABECERA ── -->
+      <header class="essay-header">
+
+        <a href="../index.html" class="essay-header__back">
+          <span class="arrow">←</span> Ensayos
+        </a>
+
+        <div class="essay-header__meta">
+          <span class="section-label">Ensayo</span>
+          <span class="essay-header__fecha">·</span>
+          <!-- ✏️ Fecha: "Ene 2025" -->
+          <span class="essay-header__fecha">✏️ Ene 2025</span>
+        </div>
+
+        <!-- ✏️ Título del ensayo -->
+        <h1 class="essay-header__title">✏️ Título del ensayo</h1>
+
+        <!--
+          ✏️ Extracto o subtítulo del ensayo.
+             Aparece en cursiva debajo del título.
+             Si no quieres extracto, elimina este párrafo.
+        -->
+        <p class="essay-header__extracto">
+          ✏️ Extracto o subtítulo. Una oración que explique
+          de qué trata el ensayo o invite a leerlo.
+        </p>
+
+      </header>
+
+      <!--
+        ══════════════════════════════════════
+        NOTA INTRODUCTORIA (opcional)
+        ══════════════════════════════════════
+        ✏️ Texto breve antes del PDF: contexto, motivación,
+           a quién va dirigido el ensayo, etc.
+        ✏️ Si no quieres texto previo, elimina esta sección.
+      -->
+      <div class="essay-note">
+        <p>
+          ✏️ Nota introductoria opcional. Puedes escribir aquí
+          el contexto del ensayo, cuándo fue escrito, para qué
+          clase o propósito, o simplemente eliminarlo si prefieres
+          que el lector vaya directamente al PDF.
+        </p>
+      </div>
+
+      <!-- ── VISOR PDF ── -->
+      <div class="pdf-section">
+
+        <div class="pdf-section__header">
+          <h2 class="pdf-section__title">Leer ensayo</h2>
+          <!--
+            ✏️ El PDF siempre se llama ensayo.pdf
+               y vive en la misma carpeta que este index.html.
+               No cambies la ruta, solo el título del atributo download.
+          -->
+          <a href="ensayo.pdf"
+             download="✏️ Título del ensayo.pdf"
+             class="btn-download">
+            ↓ Descargar PDF
+          </a>
+        </div>
+
+        <div class="pdf-viewer">
+          <iframe
+            src="ensayo.pdf"
+            title="✏️ Título del ensayo"
+            id="pdf-iframe">
+          </iframe>
+          <div class="pdf-fallback" id="pdf-fallback">
+            Tu navegador no puede mostrar el PDF en línea.<br>
+            <a href="ensayo.pdf" download class="cta"
+               style="margin-top:var(--space-4); display:inline-flex;">
+              Descárgalo aquí <span class="arrow">→</span>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <p class="footer__copy">Marcelo Ixquiac &copy; 2025</p>
+      <div class="footer__links">
+        <a href="mailto:tu@email.com"             class="footer__link">Email</a>
+        <a href="https://github.com/tuusuario"     class="footer__link" target="_blank">GitHub</a>
+        <a href="https://linkedin.com/in/tuperfil" class="footer__link" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true });
+
+    const iframe = document.getElementById('pdf-iframe');
+    if (iframe) {
+      iframe.addEventListener('error', () => {
+        iframe.style.display = 'none';
+        document.getElementById('pdf-fallback').style.display = 'block';
+      });
+    }
+  </script>
+
+</body>
+</html>
