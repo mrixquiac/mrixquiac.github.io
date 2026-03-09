@@ -581,7 +581,7 @@
       const archivos = item.archivos || (item.archivo ? [item.archivo] : []);
       const fotos    = archivos.filter(f => /\.(jpe?g|png|webp|gif)$/i.test(f));
       const videos   = archivos.filter(f => /\.(mp4|webm|mov)$/i.test(f));
-      const base     = `blog/media/${item.slug}/`;
+      const base     = `${item.slug}/`;
 
       const left = document.getElementById('modal-left');
       left.innerHTML = '';
