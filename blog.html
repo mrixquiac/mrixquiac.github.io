@@ -201,96 +201,279 @@
       .page-header__title { font-size: var(--text-3xl); }
     }
 
-    /* ── Modal ── */
+/* ══════════════════════════════════════
+       MODAL — rediseño completo
+    ══════════════════════════════════════ */
     .modal-overlay {
       display:         none;
       position:        fixed;
       inset:           0;
-      background:      rgba(10, 14, 20, 0.82);
+      background:      rgba(8, 12, 20, 0.88);
       z-index:         1000;
       align-items:     center;
       justify-content: center;
       padding:         var(--space-6);
-      backdrop-filter: blur(4px);
+      backdrop-filter: blur(6px);
     }
     .modal-overlay.open { display: flex; }
 
     .modal {
       background:    var(--color-bg-pure);
-      border-radius: 16px;
-      max-width:     820px;
+      border-radius: 20px;
+      max-width:     960px;
       width:         100%;
       max-height:    90vh;
-      overflow-y:    auto;
       position:      relative;
-      box-shadow:    0 24px 64px rgba(0,0,0,0.35);
-      animation:     modalIn 0.2s ease;
+      box-shadow:    0 32px 80px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.06);
+      animation:     modalIn 0.22s cubic-bezier(0.34,1.2,0.64,1);
+      display:       grid;
+      grid-template-columns: 1fr 340px;
+      overflow:      hidden;
     }
 
     @keyframes modalIn {
-      from { opacity: 0; transform: scale(0.96) translateY(8px); }
-      to   { opacity: 1; transform: scale(1)    translateY(0);   }
+      from { opacity: 0; transform: scale(0.94) translateY(12px); }
+      to   { opacity: 1; transform: scale(1)    translateY(0);    }
+    }
+
+    /* ── Panel izquierdo: media ── */
+    .modal__left {
+      background:    #0a0d12;
+      position:      relative;
+      display:       flex;
+      flex-direction: column;
+      min-height:    460px;
+      overflow:      hidden;
+    }
+
+    /* Carrusel */
+    .modal__carousel {
+      flex:       1;
+      position:   relative;
+      overflow:   hidden;
+    }
+
+    .modal__slide {
+      position:   absolute;
+      inset:      0;
+      display:    flex;
+      align-items:     center;
+      justify-content: center;
+      opacity:    0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .modal__slide.active {
+      opacity:        1;
+      pointer-events: auto;
+    }
+
+    .modal__slide img {
+      max-width:  100%;
+      max-height: 100%;
+      object-fit: contain;
+      display:    block;
+    }
+
+    .modal__slide video {
+      width:      100%;
+      max-height: 100%;
+      display:    block;
+    }
+
+    /* Flechas de navegación */
+    .modal__arrow {
+      position:        absolute;
+      top:             50%;
+      transform:       translateY(-50%);
+      width:           40px;
+      height:          40px;
+      border-radius:   50%;
+      background:      rgba(255,255,255,0.12);
+      border:          1px solid rgba(255,255,255,0.18);
+      color:           #fff;
+      display:         flex;
+      align-items:     center;
+      justify-content: center;
+      cursor:          pointer;
+      font-size:       1rem;
+      z-index:         5;
+      transition:      background 0.15s;
+      backdrop-filter: blur(4px);
+    }
+    .modal__arrow:hover  { background: rgba(255,255,255,0.25); }
+    .modal__arrow--prev  { left:  var(--space-4); }
+    .modal__arrow--next  { right: var(--space-4); }
+    .modal__arrow.hidden { display: none; }
+
+    /* Dots indicadores */
+    .modal__dots {
+      display:         flex;
+      justify-content: center;
+      align-items:     center;
+      gap:             var(--space-2);
+      padding:         var(--space-4) 0;
+      position:        absolute;
+      bottom:          0;
+      width:           100%;
+    }
+
+    .modal__dot {
+      width:         7px;
+      height:        7px;
+      border-radius: 50%;
+      background:    rgba(255,255,255,0.3);
+      border:        none;
+      cursor:        pointer;
+      padding:       0;
+      transition:    background 0.2s, transform 0.2s;
+    }
+    .modal__dot.active {
+      background: #fff;
+      transform:  scale(1.3);
+    }
+
+    /* Contador de slides */
+    .modal__counter {
+      position:    absolute;
+      top:         var(--space-4);
+      left:        var(--space-4);
+      font-family: var(--font-sans);
+      font-size:   var(--text-xs);
+      color:       rgba(255,255,255,0.7);
+      background:  rgba(0,0,0,0.45);
+      padding:     0.25em 0.65em;
+      border-radius: 100px;
+      backdrop-filter: blur(4px);
+    }
+    .modal__counter.hidden { display: none; }
+
+    /* Tabs foto/video */
+    .modal__tabs {
+      display:        flex;
+      gap:            var(--space-1);
+      padding:        var(--space-3) var(--space-4);
+      background:     rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      border-bottom:  1px solid rgba(255,255,255,0.08);
+      position:       relative;
+      z-index:        4;
+    }
+
+    .modal__tab {
+      font-family:    var(--font-sans);
+      font-size:      var(--text-xs);
+      font-weight:    var(--weight-semibold);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color:          rgba(255,255,255,0.5);
+      padding:        0.35em 0.85em;
+      border-radius:  100px;
+      cursor:         pointer;
+      border:         1px solid transparent;
+      background:     none;
+      transition:     all 0.15s;
+    }
+    .modal__tab:hover { color: rgba(255,255,255,0.8); }
+    .modal__tab.active {
+      color:         #fff;
+      background:    rgba(255,255,255,0.12);
+      border-color:  rgba(255,255,255,0.2);
+    }
+
+    /* ── Panel derecho: info ── */
+    .modal__right {
+      display:        flex;
+      flex-direction: column;
+      overflow-y:     auto;
+      padding:        var(--space-8) var(--space-7);
+      border-left:    1px solid var(--color-border);
     }
 
     .modal__close {
-      position:      absolute;
-      top:           var(--space-4);
-      right:         var(--space-4);
-      width:         34px;
-      height:        34px;
-      border:        1px solid var(--color-border);
+      position:   absolute;
+      top:        var(--space-4);
+      right:      var(--space-4);
+      width:      32px;
+      height:     32px;
       border-radius: 50%;
-      background:    var(--color-bg-pure);
-      display:       flex;
-      align-items:   center;
+      background: var(--color-bg-pure);
+      border:     1px solid var(--color-border);
+      display:    flex;
+      align-items:     center;
       justify-content: center;
-      cursor:        pointer;
-      font-size:     1rem;
-      color:         var(--color-text-muted);
-      z-index:       10;
-      transition:    background var(--transition-fast), color var(--transition-fast);
+      cursor:     pointer;
+      font-size:  0.85rem;
+      color:      var(--color-text-muted);
+      z-index:    20;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
     }
     .modal__close:hover { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
 
-    .modal__media {
-      width:         100%;
-      background:    #000;
-      border-radius: 16px 16px 0 0;
-      overflow:      hidden;
-      max-height:    480px;
-      display:       flex;
-      align-items:   center;
-      justify-content: center;
+    .modal__tag {
+      display:        inline-flex;
+      align-items:    center;
+      gap:            var(--space-2);
+      font-family:    var(--font-sans);
+      font-size:      0.62rem;
+      font-weight:    var(--weight-semibold);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color:          var(--color-accent);
+      margin-bottom:  var(--space-5);
     }
-    .modal__media img  { width: 100%; max-height: 480px; object-fit: contain; display: block; }
-    .modal__media video { width: 100%; max-height: 480px; display: block; }
 
-    .modal__media-tabs {
-      display:       flex;
-      gap:           var(--space-2);
-      padding:       var(--space-4) var(--space-6) 0;
+    .modal__tag-dot {
+      width:         6px;
+      height:        6px;
+      border-radius: 50%;
+      background:    var(--color-accent);
+      flex-shrink:   0;
+    }
+
+    .modal__title {
+      font-family:    var(--font-serif);
+      font-size:      var(--text-2xl);
+      font-weight:    var(--weight-semibold);
+      letter-spacing: -0.02em;
+      line-height:    var(--leading-tight);
+      color:          var(--color-text);
+      margin-bottom:  var(--space-4);
+    }
+
+    .modal__fecha {
+      font-family:   var(--font-sans);
+      font-size:     var(--text-sm);
+      color:         var(--color-text-muted);
+      margin-bottom: var(--space-7);
+      padding-bottom: var(--space-7);
       border-bottom: 1px solid var(--color-border);
-      background:    var(--color-bg-pure);
     }
-    .modal__media-tab {
-      font-family: var(--font-sans); font-size: var(--text-xs);
-      font-weight: var(--weight-semibold); letter-spacing: 0.08em;
-      text-transform: uppercase; color: var(--color-text-muted);
-      padding: 0.4em 0.8em; border-radius: var(--radius-sm);
-      cursor: pointer; border: none; background: none;
-      border-bottom: 2px solid transparent; margin-bottom: -1px;
+
+    .modal__desc {
+      font-family: var(--font-serif);
+      font-size:   var(--text-md);
+      line-height: var(--leading-relaxed);
+      color:       var(--color-text);
+      flex:        1;
     }
-    .modal__media-tab.active { color: var(--color-accent); border-bottom-color: var(--color-accent); }
 
-    .modal__body { padding: var(--space-7) var(--space-8) var(--space-8); }
-
-    .modal__meta { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
-    .modal__tipo  { font-family: var(--font-sans); font-size: 0.62rem; font-weight: var(--weight-semibold); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent); }
-    .modal__fecha { font-family: var(--font-sans); font-size: var(--text-xs); color: var(--color-text-muted); }
-    .modal__title { font-family: var(--font-serif); font-size: var(--text-2xl); font-weight: var(--weight-semibold); letter-spacing: -0.015em; color: var(--color-text); margin-bottom: var(--space-5); line-height: var(--leading-snug); }
-    .modal__desc  { font-family: var(--font-serif); font-size: var(--text-md); color: var(--color-text); line-height: var(--leading-relaxed); }
+    /* ── Responsive: en móvil apila ── */
+    @media (max-width: 700px) {
+      .modal {
+        grid-template-columns: 1fr;
+        grid-template-rows:    auto auto;
+        max-height:            92vh;
+        border-radius:         16px;
+      }
+      .modal__left  { min-height: 260px; }
+      .modal__right { border-left: none; border-top: 1px solid var(--color-border); padding: var(--space-6); max-height: 45vh; }
+      .modal__close { top: var(--space-3); right: var(--space-3); }
+    }
 
     .media-card { cursor: pointer; }
+
 
     @media (max-width: 768px) {
       .modal { max-height: 96vh; }
@@ -309,7 +492,7 @@
 
   <nav class="nav" id="main-nav">
     <div class="nav__inner">
-      <a href="index.html" class="nav__logo">Marcelo Ixquiac</a>
+      <a href="index.html" class="nav__logo">Tu Nombre</a>
       <ul class="nav__links">
         <li><a href="about.html"    class="nav__link">Sobre mí</a></li>
         <li><a href="projects.html" class="nav__link">Proyectos</a></li>
@@ -373,23 +556,21 @@
 
   <!-- ── MODAL MEDIA ── -->
   <div class="modal-overlay" id="modal-overlay">
-    <div class="modal" id="modal">
+    <div class="modal">
       <button class="modal__close" id="modal-close">✕</button>
-      <div class="modal__media" id="modal-media"></div>
-      <div class="modal__body">
-        <div class="modal__meta">
-          <span class="modal__tipo"  id="modal-tipo"></span>
-          <span class="modal__fecha" id="modal-fecha"></span>
-        </div>
+      <div class="modal__left" id="modal-left"></div>
+      <div class="modal__right">
+        <p class="modal__tag"><span class="modal__tag-dot"></span><span id="modal-tipo"></span></p>
         <h2 class="modal__title" id="modal-title"></h2>
-        <p  class="modal__desc"  id="modal-desc"></p>
+        <p class="modal__fecha"  id="modal-fecha"></p>
+        <p class="modal__desc"   id="modal-desc"></p>
       </div>
     </div>
   </div>
 
   <footer class="footer">
     <div class="footer__inner">
-      <p class="footer__copy">Marcelo Ixquiac &copy; 2025</p>
+      <p class="footer__copy">Tu Nombre &copy; 2025</p>
       <div class="footer__links">
         <a href="mailto:tu@email.com"             class="footer__link">Email</a>
         <a href="https://github.com/tuusuario"     class="footer__link" target="_blank">GitHub</a>
@@ -411,57 +592,113 @@
     }
 
     // ── Modal ────────────────────────────────────
-    const overlay    = document.getElementById('modal-overlay');
-    const modalMedia = document.getElementById('modal-media');
-    const modalTipo  = document.getElementById('modal-tipo');
-    const modalFecha = document.getElementById('modal-fecha');
-    const modalTitle = document.getElementById('modal-title');
-    const modalDesc  = document.getElementById('modal-desc');
+    const overlay = document.getElementById('modal-overlay');
+
+    function buildCarousel(container, files, base, isVideo) {
+      const carousel = document.createElement('div');
+      carousel.className = 'modal__carousel';
+      carousel.style.flex = '1';
+      files.forEach((file, i) => {
+        const slide = document.createElement('div');
+        slide.className = 'modal__slide' + (i === 0 ? ' active' : '');
+        if (isVideo) {
+          slide.innerHTML = `<video src="${base}${file}" controls playsinline style="width:100%;max-height:100%;"></video>`;
+        } else {
+          slide.innerHTML = `<img src="${base}${file}" alt="Imagen ${i+1}" />`;
+        }
+        carousel.appendChild(slide);
+      });
+      container.appendChild(carousel);
+      if (files.length > 1) {
+        const counter = document.createElement('div');
+        counter.className = 'modal__counter';
+        counter.textContent = `1 / ${files.length}`;
+        carousel.appendChild(counter);
+        const prev = document.createElement('button');
+        prev.className = 'modal__arrow modal__arrow--prev hidden';
+        prev.innerHTML = '‹';
+        const next = document.createElement('button');
+        next.className = 'modal__arrow modal__arrow--next';
+        next.innerHTML = '›';
+        carousel.appendChild(prev);
+        carousel.appendChild(next);
+        const dotsEl = document.createElement('div');
+        dotsEl.className = 'modal__dots';
+        files.forEach((_, i) => {
+          const dot = document.createElement('button');
+          dot.className = 'modal__dot' + (i === 0 ? ' active' : '');
+          dotsEl.appendChild(dot);
+        });
+        carousel.appendChild(dotsEl);
+        let current = 0;
+        const slides = carousel.querySelectorAll('.modal__slide');
+        const dots   = dotsEl.querySelectorAll('.modal__dot');
+        function goTo(n) {
+          slides[current].classList.remove('active');
+          dots[current].classList.remove('active');
+          current = (n + files.length) % files.length;
+          slides[current].classList.add('active');
+          dots[current].classList.add('active');
+          counter.textContent = `${current + 1} / ${files.length}`;
+          prev.classList.toggle('hidden', current === 0);
+          next.classList.toggle('hidden', current === files.length - 1);
+        }
+        prev.addEventListener('click', () => goTo(current - 1));
+        next.addEventListener('click', () => goTo(current + 1));
+        dots.forEach((dot, i) => dot.addEventListener('click', () => goTo(i)));
+      }
+    }
 
     function openModal(item) {
       const archivos = item.archivos || (item.archivo ? [item.archivo] : []);
       const fotos  = archivos.filter(f => /\.(jpe?g|png|webp|gif)$/i.test(f));
       const videos = archivos.filter(f => /\.(mp4|webm|mov)$/i.test(f));
       const base   = `blog/media/${item.slug}/`;
-      let html = '';
+      const left   = document.getElementById('modal-left');
+      left.innerHTML = '';
 
       if (fotos.length && videos.length) {
-        html = `<div class="modal__media-tabs" id="media-tabs">
-          <button class="modal__media-tab active" data-target="tab-foto">Foto</button>
-          <button class="modal__media-tab"        data-target="tab-video">Video</button>
-        </div>
-        <div id="tab-foto">${fotos.map(f=>`<img src="${base}${f}" alt="${item.titulo}"/>`).join('')}</div>
-        <div id="tab-video" style="display:none;">${videos.map(v=>`<video src="${base}${v}" controls playsinline></video>`).join('')}</div>`;
+        const tabBar = document.createElement('div');
+        tabBar.className = 'modal__tabs';
+        ['foto','video'].forEach(t => {
+          const btn = document.createElement('button');
+          btn.className = 'modal__tab' + (t === 'foto' ? ' active' : '');
+          btn.textContent = t === 'foto' ? 'Foto' : 'Video';
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.modal__tab').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('[data-group]').forEach(g => {
+              g.style.display = g.dataset.group === t ? 'flex' : 'none';
+            });
+          });
+          tabBar.appendChild(btn);
+        });
+        left.appendChild(tabBar);
+        [['foto', fotos, false], ['video', videos, true]].forEach(([t, files, isVid]) => {
+          const g = document.createElement('div');
+          g.dataset.group = t;
+          g.style.cssText = `display:${t==='foto'?'flex':'none'};flex-direction:column;flex:1;`;
+          buildCarousel(g, files, base, isVid);
+          left.appendChild(g);
+        });
       } else if (fotos.length) {
-        html = fotos.map(f => `<img src="${base}${f}" alt="${item.titulo}"/>`).join('');
+        buildCarousel(left, fotos, base, false);
       } else if (videos.length) {
-        html = videos.map(v => `<video src="${base}${v}" controls playsinline></video>`).join('');
+        buildCarousel(left, videos, base, true);
       }
 
-      modalMedia.innerHTML    = html;
-      modalTipo.textContent   = item.tipo;
-      modalFecha.textContent  = '· ' + item.fecha;
-      modalTitle.textContent  = item.titulo;
-      modalDesc.textContent   = item.descripcion;
+      document.getElementById('modal-tipo').textContent  = item.tipo;
+      document.getElementById('modal-title').textContent = item.titulo;
+      document.getElementById('modal-fecha').textContent = item.fecha;
+      document.getElementById('modal-desc').textContent  = item.descripcion;
       overlay.classList.add('open');
       document.body.style.overflow = 'hidden';
-
-      // Tabs si hay foto+video
-      document.querySelectorAll('.modal__media-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          document.querySelectorAll('.modal__media-tab').forEach(t => t.classList.remove('active'));
-          tab.classList.add('active');
-          document.querySelectorAll('[id^="tab-"]').forEach(el => {
-            el.style.display = el.id === tab.dataset.target ? '' : 'none';
-          });
-        });
-      });
     }
 
     function closeModal() {
       overlay.classList.remove('open');
       document.body.style.overflow = '';
-      modalMedia.innerHTML = '';
+      setTimeout(() => { document.getElementById('modal-left').innerHTML = ''; }, 200);
     }
 
     document.getElementById('modal-close').addEventListener('click', closeModal);

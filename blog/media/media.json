@@ -1,29 +1,20 @@
 [
   {
-    "slug":        "olas-de-madrugada",
-    "titulo":      "Olas de madrugada",
-    "descripcion": "El mar a las 4am tiene una calma que no existe en ningún otro momento del día. Fui solo, sin cámara buena, solo con el teléfono. A veces la mejor foto es la que no planeaste.",
+    "slug":        "Alcubierre",
+    "titulo":      "Miguel Alcubierre en la Lección Inagural ECFM 2026",
+    "descripcion": "XD",
     "tipo":        "foto",
-    "archivos":    ["foto.jpg"],
+    "archivos":    ["Alcubierre1.jpeg", "Alcubierre2.jpeg"],
     "fecha":       "Ene 2025",
     "destacado":   true
   },
   {
-    "slug":        "laboratorio-cuantica",
-    "titulo":      "Laboratorio de mecánica cuántica",
-    "descripcion": "Preparando el experimento de la doble rendija. Todo listo para la tarde. Hay algo curioso en preparar un experimento que lleva cien años haciéndose y que todavía no deja de sorprender.",
+    "slug":        "Maldacena",
+    "titulo":      "Juan Maldacena en la Lección Inagural ECFM",
+    "descripcion": "xd",
     "tipo":        "foto",
-    "archivos":    ["foto.jpg"],
-    "fecha":       "Dic 2024",
-    "destacado":   false
-  },
-  {
-    "slug":        "ciudad-desde-arriba",
-    "titulo":      "La ciudad desde arriba",
-    "descripcion": "Grabado desde el edificio de ciencias durante el atardecer. La ciudad parece un sistema de partículas, cada carro un electrón siguiendo su potencial.",
-    "tipo":        "video",
-    "archivos":    ["video.mp4"],
-    "fecha":       "Nov 2024",
+    "archivos":    ["Maldacena.jpeg"],
+    "fecha":       "Junio 2024",
     "destacado":   false
   }
 ]
