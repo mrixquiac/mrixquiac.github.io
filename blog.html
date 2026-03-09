@@ -201,6 +201,102 @@
       .page-header__title { font-size: var(--text-3xl); }
     }
 
+    /* ── Modal ── */
+    .modal-overlay {
+      display:         none;
+      position:        fixed;
+      inset:           0;
+      background:      rgba(10, 14, 20, 0.82);
+      z-index:         1000;
+      align-items:     center;
+      justify-content: center;
+      padding:         var(--space-6);
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background:    var(--color-bg-pure);
+      border-radius: 16px;
+      max-width:     820px;
+      width:         100%;
+      max-height:    90vh;
+      overflow-y:    auto;
+      position:      relative;
+      box-shadow:    0 24px 64px rgba(0,0,0,0.35);
+      animation:     modalIn 0.2s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.96) translateY(8px); }
+      to   { opacity: 1; transform: scale(1)    translateY(0);   }
+    }
+
+    .modal__close {
+      position:      absolute;
+      top:           var(--space-4);
+      right:         var(--space-4);
+      width:         34px;
+      height:        34px;
+      border:        1px solid var(--color-border);
+      border-radius: 50%;
+      background:    var(--color-bg-pure);
+      display:       flex;
+      align-items:   center;
+      justify-content: center;
+      cursor:        pointer;
+      font-size:     1rem;
+      color:         var(--color-text-muted);
+      z-index:       10;
+      transition:    background var(--transition-fast), color var(--transition-fast);
+    }
+    .modal__close:hover { background: var(--color-accent); color: #fff; border-color: var(--color-accent); }
+
+    .modal__media {
+      width:         100%;
+      background:    #000;
+      border-radius: 16px 16px 0 0;
+      overflow:      hidden;
+      max-height:    480px;
+      display:       flex;
+      align-items:   center;
+      justify-content: center;
+    }
+    .modal__media img  { width: 100%; max-height: 480px; object-fit: contain; display: block; }
+    .modal__media video { width: 100%; max-height: 480px; display: block; }
+
+    .modal__media-tabs {
+      display:       flex;
+      gap:           var(--space-2);
+      padding:       var(--space-4) var(--space-6) 0;
+      border-bottom: 1px solid var(--color-border);
+      background:    var(--color-bg-pure);
+    }
+    .modal__media-tab {
+      font-family: var(--font-sans); font-size: var(--text-xs);
+      font-weight: var(--weight-semibold); letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--color-text-muted);
+      padding: 0.4em 0.8em; border-radius: var(--radius-sm);
+      cursor: pointer; border: none; background: none;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+    }
+    .modal__media-tab.active { color: var(--color-accent); border-bottom-color: var(--color-accent); }
+
+    .modal__body { padding: var(--space-7) var(--space-8) var(--space-8); }
+
+    .modal__meta { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-3); }
+    .modal__tipo  { font-family: var(--font-sans); font-size: 0.62rem; font-weight: var(--weight-semibold); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent); }
+    .modal__fecha { font-family: var(--font-sans); font-size: var(--text-xs); color: var(--color-text-muted); }
+    .modal__title { font-family: var(--font-serif); font-size: var(--text-2xl); font-weight: var(--weight-semibold); letter-spacing: -0.015em; color: var(--color-text); margin-bottom: var(--space-5); line-height: var(--leading-snug); }
+    .modal__desc  { font-family: var(--font-serif); font-size: var(--text-md); color: var(--color-text); line-height: var(--leading-relaxed); }
+
+    .media-card { cursor: pointer; }
+
+    @media (max-width: 768px) {
+      .modal { max-height: 96vh; }
+      .modal__body { padding: var(--space-5) var(--space-5) var(--space-6); }
+    }
+
     @media (max-width: 480px) {
       .media-grid { grid-template-columns: 1fr; }
       .ensayo-preview-item { grid-template-columns: 1fr; gap: var(--space-2); }
@@ -275,6 +371,22 @@
     </div>
   </main>
 
+  <!-- ── MODAL MEDIA ── -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" id="modal">
+      <button class="modal__close" id="modal-close">✕</button>
+      <div class="modal__media" id="modal-media"></div>
+      <div class="modal__body">
+        <div class="modal__meta">
+          <span class="modal__tipo"  id="modal-tipo"></span>
+          <span class="modal__fecha" id="modal-fecha"></span>
+        </div>
+        <h2 class="modal__title" id="modal-title"></h2>
+        <p  class="modal__desc"  id="modal-desc"></p>
+      </div>
+    </div>
+  </div>
+
   <footer class="footer">
     <div class="footer__inner">
       <p class="footer__copy">Marcelo Ixquiac &copy; 2025</p>
@@ -298,6 +410,64 @@
         color:var(--color-text-muted);padding:var(--space-4) 0;">${msg}</p>`;
     }
 
+    // ── Modal ────────────────────────────────────
+    const overlay    = document.getElementById('modal-overlay');
+    const modalMedia = document.getElementById('modal-media');
+    const modalTipo  = document.getElementById('modal-tipo');
+    const modalFecha = document.getElementById('modal-fecha');
+    const modalTitle = document.getElementById('modal-title');
+    const modalDesc  = document.getElementById('modal-desc');
+
+    function openModal(item) {
+      const archivos = item.archivos || (item.archivo ? [item.archivo] : []);
+      const fotos  = archivos.filter(f => /\.(jpe?g|png|webp|gif)$/i.test(f));
+      const videos = archivos.filter(f => /\.(mp4|webm|mov)$/i.test(f));
+      const base   = `blog/media/${item.slug}/`;
+      let html = '';
+
+      if (fotos.length && videos.length) {
+        html = `<div class="modal__media-tabs" id="media-tabs">
+          <button class="modal__media-tab active" data-target="tab-foto">Foto</button>
+          <button class="modal__media-tab"        data-target="tab-video">Video</button>
+        </div>
+        <div id="tab-foto">${fotos.map(f=>`<img src="${base}${f}" alt="${item.titulo}"/>`).join('')}</div>
+        <div id="tab-video" style="display:none;">${videos.map(v=>`<video src="${base}${v}" controls playsinline></video>`).join('')}</div>`;
+      } else if (fotos.length) {
+        html = fotos.map(f => `<img src="${base}${f}" alt="${item.titulo}"/>`).join('');
+      } else if (videos.length) {
+        html = videos.map(v => `<video src="${base}${v}" controls playsinline></video>`).join('');
+      }
+
+      modalMedia.innerHTML    = html;
+      modalTipo.textContent   = item.tipo;
+      modalFecha.textContent  = '· ' + item.fecha;
+      modalTitle.textContent  = item.titulo;
+      modalDesc.textContent   = item.descripcion;
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      // Tabs si hay foto+video
+      document.querySelectorAll('.modal__media-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.modal__media-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          document.querySelectorAll('[id^="tab-"]').forEach(el => {
+            el.style.display = el.id === tab.dataset.target ? '' : 'none';
+          });
+        });
+      });
+    }
+
+    function closeModal() {
+      overlay.classList.remove('open');
+      document.body.style.overflow = '';
+      modalMedia.innerHTML = '';
+    }
+
+    document.getElementById('modal-close').addEventListener('click', closeModal);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
     // ── Media preview (3 recientes) ──────────────
     fetch('blog/media/media.json')
       .then(r => r.json())
@@ -308,23 +478,24 @@
           .slice(0, 3);
         if (!top.length) { empty(el, 'Próximamente.'); return; }
         top.forEach(item => {
-          const a = document.createElement('a');
-          a.href      = `blog/media/${item.slug}/index.html`;
-          a.className = 'media-card';
-          const thumb = item.tipo === 'video'
-            ? `<video src="${'blog/media/' + item.slug + '/' + item.archivo}"
-                 muted playsinline preload="metadata"
-                 style="pointer-events:none;"></video>`
-            : item.archivo
-              ? `<img src="blog/media/${item.slug}/${item.archivo}" alt="${item.titulo}" />`
-              : `<span class="media-card__thumb-placeholder">${item.tipo === 'video' ? '▶' : '◻'}</span>`;
-          a.innerHTML = `
+          const archivos = item.archivos || (item.archivo ? [item.archivo] : []);
+          const primerArchivo = archivos[0] || '';
+          const esVideo = /\.(mp4|webm|mov)$/i.test(primerArchivo);
+          const thumb = esVideo
+            ? `<video src="blog/media/${item.slug}/${primerArchivo}" muted playsinline preload="metadata" style="pointer-events:none;"></video>`
+            : primerArchivo
+              ? `<img src="blog/media/${item.slug}/${primerArchivo}" alt="${item.titulo}" />`
+              : '';
+          const card = document.createElement('div');
+          card.className = 'media-card';
+          card.innerHTML = `
             <div class="media-card__thumb">${thumb}</div>
             <div class="media-card__body">
               <p class="media-card__title">${item.titulo}</p>
               <p class="media-card__desc">${item.descripcion}</p>
             </div>`;
-          el.appendChild(a);
+          card.addEventListener('click', () => openModal(item));
+          el.appendChild(card);
         });
       })
       .catch(() => empty(document.getElementById('media-preview'),

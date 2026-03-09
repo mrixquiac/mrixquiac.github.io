@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sobre la belleza en física — Marcelo Ixquiac</title>
+  <meta name="description" content="Qué significa que una ecuación sea hermosa y por qué eso importa más de lo que parece." />
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+    .essay-header {
+      padding-top: var(--space-20); padding-bottom: var(--space-10);
+      border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-12);
+    }
+    .essay-header__back {
+      display: inline-flex; align-items: center; gap: var(--space-2);
+      font-family: var(--font-sans); font-size: var(--text-sm);
+      color: var(--color-text-muted); margin-bottom: var(--space-8);
+      text-decoration: none; transition: color var(--transition-fast);
+    }
+    .essay-header__back:hover { color: var(--color-accent); }
+    .essay-header__back:hover .arr { transform: translateX(-3px); }
+    .essay-header__back .arr { display:inline-block; transition: transform var(--transition-fast); }
+    .essay-header__meta { display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); }
+    .essay-header__fecha { font-family: var(--font-sans); font-size: var(--text-sm); color: var(--color-text-muted); }
+    .essay-header__title { font-size: var(--text-4xl); letter-spacing: -0.025em; line-height: var(--leading-tight); margin-bottom: var(--space-5); }
+    .essay-header__extracto { font-family: var(--font-serif); font-size: var(--text-lg); color: var(--color-text-muted); font-style: italic; max-width: 600px; line-height: var(--leading-relaxed); }
+    .essay-body { max-width: var(--width-blog); margin-bottom: var(--space-20); }
+    .essay-body h2 { font-size: var(--text-2xl); letter-spacing: -0.015em; margin-top: var(--space-14); margin-bottom: var(--space-4); }
+    .essay-body p { font-family: var(--font-serif); font-size: var(--text-md); line-height: var(--leading-loose); color: var(--color-text); margin-bottom: var(--space-6); }
+    .essay-body p:last-child { margin-bottom: 0; }
+    .essay-body .drop-cap::first-letter { float: left; font-size: 4em; line-height: 0.8; padding-right: 0.1em; padding-top: 0.1em; color: var(--color-accent); font-family: var(--font-serif); font-weight: var(--weight-semibold); }
+    .essay-body blockquote { border-left: 3px solid var(--color-accent); padding-left: var(--space-6); margin: var(--space-8) 0; color: var(--color-text-muted); font-style: italic; font-family: var(--font-serif); font-size: var(--text-md); line-height: var(--leading-relaxed); }
+    .essay-body hr { border: none; border-top: 1px solid var(--color-border); margin: var(--space-12) 0; }
+    .pdf-sep { display: flex; align-items: center; gap: var(--space-5); margin-bottom: var(--space-10); }
+    .pdf-sep::before, .pdf-sep::after { content: ''; flex: 1; height: 1px; background: var(--color-border); }
+    .pdf-sep__label { font-family: var(--font-sans); font-size: var(--text-xs); font-weight: var(--weight-semibold); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-muted); white-space: nowrap; }
+    .pdf-section { margin-bottom: var(--space-20); }
+    .pdf-section__header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-4); margin-bottom: var(--space-6); }
+    .pdf-section__title { font-family: var(--font-serif); font-size: var(--text-xl); font-weight: var(--weight-semibold); }
+    .btn-download { display: inline-flex; align-items: center; gap: var(--space-2); font-family: var(--font-sans); font-size: var(--text-sm); font-weight: var(--weight-medium); color: var(--color-accent); border: 1px solid var(--color-accent); border-radius: var(--radius-md); padding: 0.45em 1em; text-decoration: none; transition: background-color var(--transition-fast), color var(--transition-fast); }
+    .btn-download:hover { background-color: var(--color-accent); color: #fff; }
+    .pdf-viewer { width: 100%; border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; background: #f0f0f0; }
+    .pdf-viewer iframe { width: 100%; height: 720px; border: none; display: block; }
+    .pdf-fallback { display: none; padding: var(--space-10); text-align: center; font-family: var(--font-sans); font-size: var(--text-sm); color: var(--color-text-muted); }
+    @media (max-width: 768px) {
+      .essay-header { padding-top: var(--space-12); }
+      .essay-header__title { font-size: var(--text-3xl); }
+      .pdf-viewer iframe { height: 480px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="nav" id="main-nav">
+    <div class="nav__inner">
+      <a href="../../../index.html" class="nav__logo">Marcelo Ixquiac</a>
+      <ul class="nav__links">
+        <li><a href="../../../about.html"    class="nav__link">Sobre mí</a></li>
+        <li><a href="../../../projects.html" class="nav__link">Proyectos</a></li>
+        <li><a href="../../../blog.html"     class="nav__link active">Blog</a></li>
+        <li><a href="../../../now.html"      class="nav__link">Ahora</a></li>
+        <li><a href="../../../contact.html"  class="nav__link">Contacto</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+
+      <header class="essay-header">
+        <a href="../index.html" class="essay-header__back">
+          <span class="arr">←</span> Ensayos
+        </a>
+        <div class="essay-header__meta">
+          <span class="section-label">Ensayo</span>
+          <span class="essay-header__fecha">· Ene 2025</span>
+        </div>
+        <h1 class="essay-header__title">Sobre la belleza en física</h1>
+        <p class="essay-header__extracto">
+          Qué significa que una ecuación sea hermosa y por qué eso
+          importa más de lo que parece.
+        </p>
+      </header>
+
+      <div class="essay-body">
+
+        <h2>Una pregunta incómoda</h2>
+
+        <p class="drop-cap">
+          Hay una frase que aparece con frecuencia en los libros de física,
+          en las conferencias, en las conversaciones entre físicos: "esta
+          ecuación es hermosa." La dicen con naturalidad, como si fuera
+          algo obvio. Y durante mucho tiempo, yo asentía sin entender
+          exactamente qué quería decir.
+        </p>
+
+        <p>
+          No es que no viera algo en las ecuaciones. Pero la belleza me
+          parecía una categoría estética, subjetiva, quizás incluso
+          sospechosa en un campo que presume de objetividad. ¿Qué tiene
+          que ver la belleza con si una ecuación describe correctamente
+          la realidad?
+        </p>
+
+        <h2>Lo que Dirac dijo</h2>
+
+        <p>
+          Paul Dirac fue quizás el físico que llevó esta idea más lejos.
+          En una conferencia en 1939 afirmó que una ecuación física
+          hermosa tiene más probabilidades de ser correcta que una fea.
+          Es una afirmación extraordinaria. Sugiere que la estética no es
+          ornamental — es epistémica.
+        </p>
+
+        <blockquote>
+          "Es más importante tener belleza en las propias ecuaciones que
+          hacer que encajen con el experimento."
+          — Paul Dirac
+        </blockquote>
+
+        <p>
+          La ecuación de Dirac — la que predijo la existencia del
+          antielectrón antes de que alguien lo buscara — nació en parte
+          de una exigencia estética: la ecuación de Schrödinger no era
+          relativista, y eso la hacía, en algún sentido, asimétrica.
+          Dirac quería una ecuación más simétrica. Más completa. Más
+          bella. Y resultó ser más verdadera.
+        </p>
+
+        <h2>Qué significa "hermosa" aquí</h2>
+
+        <p>
+          Creo que cuando un físico dice que una ecuación es hermosa,
+          está hablando de varias cosas a la vez. Primero, de simetría:
+          una ecuación que trata el espacio y el tiempo de la misma manera,
+          o que permanece igual ante ciertas transformaciones, nos dice
+          algo profundo sobre la estructura del universo.
+        </p>
+
+        <p>
+          Segundo, de economía: una ecuación que dice mucho con poco.
+          Las ecuaciones de Maxwell en su formulación moderna son cuatro
+          líneas que contienen toda la electrodinámica clásica. Eso no
+          es solo conveniente — es indicativo de que hemos encontrado
+          los conceptos correctos.
+        </p>
+
+        <p>
+          Tercero, y quizás lo más difícil de articular: de inevitabilidad.
+          Las ecuaciones más hermosas parecen no poder ser de otra manera.
+          No se sienten elegidas — se sienten descubiertas.
+        </p>
+
+        <hr />
+
+        <h2>Una conclusión provisional</h2>
+
+        <p>
+          No creo que la belleza sea una garantía de verdad. La historia
+          de la física está llena de teorías bellas que resultaron ser
+          incorrectas. Pero creo que la belleza matemática, cuando es
+          genuina, suele señalar que hemos capturado algo estructural
+          sobre el problema — que no estamos describiendo síntomas, sino
+          causas.
+        </p>
+
+        <p>
+          Aprender a ver esa belleza es, en cierta manera, aprender a
+          pensar como físico. No como habilidad decorativa. Como brújula.
+        </p>
+
+      </div>
+
+      <div class="pdf-sep">
+        <span class="pdf-sep__label">Versión en PDF</span>
+      </div>
+
+      <div class="pdf-section">
+        <div class="pdf-section__header">
+          <h2 class="pdf-section__title">Leer en PDF</h2>
+          <a href="ensayo.pdf"
+             download="Sobre la belleza en física — Marcelo Ixquiac.pdf"
+             class="btn-download">
+            ↓ Descargar PDF
+          </a>
+        </div>
+        <div class="pdf-viewer">
+          <iframe src="ensayo.pdf" title="Sobre la belleza en física" id="pdf-iframe"></iframe>
+          <div class="pdf-fallback" id="pdf-fallback">
+            Tu navegador no puede mostrar el PDF en línea.<br>
+            <a href="ensayo.pdf" download class="cta"
+               style="margin-top:var(--space-4);display:inline-flex;">
+              Descárgalo aquí <span class="arrow">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <p class="footer__copy">Marcelo Ixquiac &copy; 2025</p>
+      <div class="footer__links">
+        <a href="mailto:tu@email.com"             class="footer__link">Email</a>
+        <a href="https://github.com/tuusuario"     class="footer__link" target="_blank">GitHub</a>
+        <a href="https://linkedin.com/in/tuperfil" class="footer__link" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true });
+    const iframe = document.getElementById('pdf-iframe');
+    if (iframe) {
+      iframe.addEventListener('error', () => {
+        iframe.style.display = 'none';
+        document.getElementById('pdf-fallback').style.display = 'block';
+      });
+    }
+  </script>
+
+</body>
+</html>
