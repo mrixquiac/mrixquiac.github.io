@@ -315,7 +315,8 @@
       position:       relative;
       display:        flex;
       flex-direction: column;
-      min-height:     460px;
+      height:         520px;
+      min-height:     520px;
       overflow:       hidden;
     }
 
@@ -323,6 +324,7 @@
       flex:     1;
       position: relative;
       overflow: hidden;
+      height:   100%;
     }
 
     .modal__slide {
@@ -646,7 +648,7 @@
         top.forEach(p => {
           const tags = (p.etiquetas || []).map(t => `<span class="tag">${t}</span>`).join('');
           const a    = document.createElement('a');
-          a.href      = `projects/${p.slug}.html`;
+          a.href      = p.enlace;
           a.className = 'project-row';
           a.style.display = 'grid';
           a.innerHTML = `
