@@ -2,7 +2,7 @@
   {
     "slug":        "Alcubierre",
     "titulo":      "Miguel Alcubierre en la Lección Inagural ECFM 2026",
-    "descripcion": "XD",
+    "descripcion": "Test",
     "tipo":        "foto",
     "archivos":    ["Alcubierre1.jpeg", "Alcubierre2.jpeg"],
     "fecha":       "Ene 2025",
@@ -11,7 +11,7 @@
   {
     "slug":        "Maldacena",
     "titulo":      "Juan Maldacena en la Lección Inagural ECFM",
-    "descripcion": "xd",
+    "descripcion": "Muy interesante conferencia y un gusto compartir con uno de los físicos mas populares académicamente en Latinoamérica",
     "tipo":        "foto",
     "archivos":    ["Maldacena.jpeg"],
     "fecha":       "Junio 2024",
