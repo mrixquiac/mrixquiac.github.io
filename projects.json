@@ -5,47 +5,5 @@
     "etiquetas": ["simulacion", "metodos"],
     "enlace": "projects/plantilla.html",
     "destacado": true
-  },
-  {
-    "titulo": "Simulación de la ecuación de onda",
-    "resumen": "Método de diferencias finitas para modelar la propagación de ondas en medios con velocidad variable. Incluye análisis de estabilidad CFL y condiciones de contorno absorbentes (PML).",
-    "etiquetas": ["simulacion", "metodos"],
-    "enlace": "projects/wave-equation.html",
-    "destacado": false
-  },
-  {
-    "titulo": "Integrador de N cuerpos — método de Verlet",
-    "resumen": "Integrador simpléctico para sistemas gravitacionales de N partículas. Conservación de energía a largo plazo y comparación cuantitativa con Runge-Kutta de orden 4.",
-    "etiquetas": ["simulacion", "metodos"],
-    "enlace": "projects/nbody.html",
-    "destacado": false
-  },
-  {
-    "titulo": "Exponente de Lyapunov en el péndulo caótico",
-    "resumen": "Caracterización cuantitativa de la sensibilidad a condiciones iniciales del péndulo doble. Cálculo del exponente de Lyapunov máximo y análisis del espacio de fase.",
-    "etiquetas": ["caos", "analisis"],
-    "enlace": "projects/chaos.html",
-    "destacado": false
-  },
-  {
-    "titulo": "Ecuación de calor en 2D — Crank-Nicolson",
-    "resumen": "Solución numérica de la ecuación de difusión en dos dimensiones con el esquema implícito de Crank-Nicolson. Solver de sistema lineal disperso con SciPy.",
-    "etiquetas": ["simulacion", "metodos"],
-    "enlace": "projects/heat-equation.html",
-    "destacado": false
-  },
-  {
-    "titulo": "Integración Monte Carlo para alta dimensión",
-    "resumen": "Comparación de Monte Carlo simple, muestreo por importancia y cadenas de Markov (MCMC) para integración numérica en espacios de alta dimensión.",
-    "etiquetas": ["metodos", "analisis"],
-    "enlace": "projects/monte-carlo.html",
-    "destacado": false
-  },
-  {
-    "titulo": "Análisis de datos experimentales del péndulo",
-    "resumen": "Procesamiento y análisis de datos de un péndulo físico real. Ajuste de parámetros por mínimos cuadrados y comparación con la solución numérica del modelo teórico.",
-    "etiquetas": ["analisis", "caos"],
-    "enlace": "projects/pendulum-data.html",
-    "destacado": false
   }
 ]
