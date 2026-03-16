@@ -4,13 +4,13 @@
     "titulo":    "Sobre la belleza en física",
     "extracto":  "Qué significa que una ecuación sea hermosa y por qué eso importa más de lo que parece.",
     "fecha":     "Ene 2025",
-    "destacado": true
+    "destacado": false
   },
   {
-    "slug":      "aprender-a-equivocarse",
-    "titulo":    "Aprender a equivocarse bien",
-    "extracto":  "El error como parte del método. Reflexión sobre cómo el laboratorio enseña cosas que el aula no puede.",
-    "fecha":     "Dic 2024",
-    "destacado": false
+    "slug":      "ManualExperimental",
+    "titulo":    "Guía de Reportes Científicos",
+    "extracto":  "Cómo estructurar un reporte científico y los lineamientos a seguir",
+    "fecha":     "Marzo 2026",
+    "destacado": true
   }
 ]

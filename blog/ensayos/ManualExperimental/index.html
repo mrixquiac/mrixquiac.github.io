@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!--
+  ╔══════════════════════════════════════════════════════════════╗
+  ║  PLANTILLA — Ensayo individual                               ║
+  ║                                                              ║
+  ║  ESTRUCTURA DE CARPETAS:                                     ║
+  ║  blog/ensayos/                                               ║
+  ║  ├── ensayos.json          ← agregar entrada aquí            ║
+  ║  ├── index.html            ← índice (no tocar)               ║
+  ║  └── slug-del-ensayo/                                        ║
+  ║      ├── index.html        ← este archivo (copiado)          ║
+  ║      └── ensayo.pdf        ← el PDF, siempre ese nombre      ║
+  ║                                                              ║
+  ║  PASOS PARA PUBLICAR UN ENSAYO NUEVO:                        ║
+  ║  1. Crea la carpeta:  blog/ensayos/tu-slug/                  ║
+  ║  2. Pon el PDF:       blog/ensayos/tu-slug/ensayo.pdf        ║
+  ║  3. Copia este index.html a esa carpeta                      ║
+  ║  4. Rellena todos los ✏️ de este archivo                     ║
+  ║  5. Agrega entrada en ensayos.json:                          ║
+  ║     {                                                        ║
+  ║       "slug":      "tu-slug",                                ║
+  ║       "titulo":    "Título del ensayo",                      ║
+  ║       "extracto":  "Resumen breve (aparece en el índice)",   ║
+  ║       "fecha":     "Mar 2025",                               ║
+  ║       "destacado": false                                     ║
+  ║     }                                                        ║
+  ╚══════════════════════════════════════════════════════════════╝
+  -->
+
+  <!-- ✏️ Título de pestaña -->
+  <title></title>
+  <meta name="description" content="✏️ Extracto breve del ensayo." />
+
+  <link rel="stylesheet" href="../../../style.css" />
+  <style>
+
+    .essay-header {
+      padding-top:    var(--space-20);
+      padding-bottom: var(--space-10);
+      border-bottom:  1px solid var(--color-border);
+      margin-bottom:  var(--space-12);
+    }
+
+    .essay-header__back {
+      display:         inline-flex;
+      align-items:     center;
+      gap:             var(--space-2);
+      font-family:     var(--font-sans);
+      font-size:       var(--text-sm);
+      color:           var(--color-text-muted);
+      margin-bottom:   var(--space-8);
+      text-decoration: none;
+      transition:      color var(--transition-fast);
+    }
+    .essay-header__back:hover { color: var(--color-accent); }
+    .essay-header__back:hover .arr { transform: translateX(-3px); }
+    .essay-header__back .arr { display:inline-block; transition: transform var(--transition-fast); }
+
+    .essay-header__meta {
+      display:       flex;
+      align-items:   center;
+      gap:           var(--space-3);
+      margin-bottom: var(--space-4);
+    }
+
+    .essay-header__fecha {
+      font-family: var(--font-sans);
+      font-size:   var(--text-sm);
+      color:       var(--color-text-muted);
+    }
+
+    .essay-header__title {
+      font-size:      var(--text-4xl);
+      letter-spacing: -0.025em;
+      line-height:    var(--leading-tight);
+      margin-bottom:  var(--space-5);
+    }
+
+    .essay-header__extracto {
+      font-family: var(--font-serif);
+      font-size:   var(--text-lg);
+      color:       var(--color-text-muted);
+      font-style:  italic;
+      max-width:   600px;
+      line-height: var(--leading-relaxed);
+    }
+
+    /* ── Cuerpo del ensayo ── */
+    .essay-body {
+      max-width:     var(--width-blog);
+      margin-bottom: var(--space-20);
+    }
+
+    .essay-body h2 {
+      font-size:     var(--text-2xl);
+      letter-spacing: -0.015em;
+      margin-top:    var(--space-14);
+      margin-bottom: var(--space-4);
+    }
+
+    .essay-body h3 {
+      font-size:     var(--text-xl);
+      letter-spacing: -0.01em;
+      margin-top:    var(--space-10);
+      margin-bottom: var(--space-3);
+    }
+
+    .essay-body p {
+      font-family:   var(--font-serif);
+      font-size:     var(--text-md);
+      line-height:   var(--leading-loose);
+      color:         var(--color-text);
+      margin-bottom: var(--space-6);
+    }
+
+    .essay-body p:last-child { margin-bottom: 0; }
+
+    /* Primera letra decorativa opcional */
+    .essay-body .drop-cap::first-letter {
+      float:       left;
+      font-size:   4em;
+      line-height: 0.8;
+      padding-right: 0.1em;
+      padding-top:   0.1em;
+      color:         var(--color-accent);
+      font-family:   var(--font-serif);
+      font-weight:   var(--weight-semibold);
+    }
+
+    .essay-body blockquote {
+      border-left:  3px solid var(--color-accent);
+      padding-left: var(--space-6);
+      margin:       var(--space-8) 0;
+      color:        var(--color-text-muted);
+      font-style:   italic;
+      font-family:  var(--font-serif);
+      font-size:    var(--text-md);
+      line-height:  var(--leading-relaxed);
+    }
+
+    .essay-body hr {
+      border:     none;
+      border-top: 1px solid var(--color-border);
+      margin:     var(--space-12) 0;
+    }
+
+    /* ── Separador antes del PDF ── */
+    .pdf-sep {
+      display:        flex;
+      align-items:    center;
+      gap:            var(--space-5);
+      margin-bottom:  var(--space-10);
+    }
+
+    .pdf-sep::before,
+    .pdf-sep::after {
+      content:    '';
+      flex:       1;
+      height:     1px;
+      background: var(--color-border);
+    }
+
+    .pdf-sep__label {
+      font-family:    var(--font-sans);
+      font-size:      var(--text-xs);
+      font-weight:    var(--weight-semibold);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color:          var(--color-text-muted);
+      white-space:    nowrap;
+    }
+
+    /* ── Visor PDF ── */
+    .pdf-section { margin-bottom: var(--space-20); }
+
+    .pdf-section__header {
+      display:         flex;
+      align-items:     center;
+      justify-content: space-between;
+      flex-wrap:       wrap;
+      gap:             var(--space-4);
+      margin-bottom:   var(--space-6);
+    }
+
+    .pdf-section__title {
+      font-family: var(--font-serif);
+      font-size:   var(--text-xl);
+      font-weight: var(--weight-semibold);
+    }
+
+    .btn-download {
+      display:         inline-flex;
+      align-items:     center;
+      gap:             var(--space-2);
+      font-family:     var(--font-sans);
+      font-size:       var(--text-sm);
+      font-weight:     var(--weight-medium);
+      color:           var(--color-accent);
+      border:          1px solid var(--color-accent);
+      border-radius:   var(--radius-md);
+      padding:         0.45em 1em;
+      text-decoration: none;
+      transition:      background-color var(--transition-fast), color var(--transition-fast);
+    }
+
+    .btn-download:hover { background-color: var(--color-accent); color: #fff; }
+
+    .pdf-viewer {
+      width:         100%;
+      border:        1px solid var(--color-border);
+      border-radius: var(--radius-lg);
+      overflow:      hidden;
+      background:    #f0f0f0;
+    }
+
+    .pdf-viewer iframe {
+      width:   100%;
+      height:  720px;
+      border:  none;
+      display: block;
+    }
+
+    .pdf-fallback {
+      display:     none;
+      padding:     var(--space-10);
+      text-align:  center;
+      font-family: var(--font-sans);
+      font-size:   var(--text-sm);
+      color:       var(--color-text-muted);
+      line-height: var(--leading-relaxed);
+    }
+
+    @media (max-width: 768px) {
+      .essay-header { padding-top: var(--space-12); }
+      .essay-header__title { font-size: var(--text-3xl); }
+      .pdf-viewer iframe { height: 480px; }
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav class="nav" id="main-nav">
+    <div class="nav__inner">
+      <a href="../../../index.html" class="nav__logo">Marcelo Ixquiac</a>
+      <ul class="nav__links">
+        <li><a href="../../../about.html"    class="nav__link">Sobre mí</a></li>
+        <li><a href="../../../projects.html" class="nav__link">Proyectos</a></li>
+        <li><a href="../../../blog.html"     class="nav__link active">Blog</a></li>
+        <li><a href="../../../now.html"      class="nav__link">Ahora</a></li>
+        <li><a href="../../../contact.html"  class="nav__link">Contacto</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+
+      <!-- ── CABECERA ── -->
+      <header class="essay-header">
+        <a href="../index.html" class="essay-header__back">
+          <span class="arr">←</span> Ensayos
+        </a>
+        <div class="essay-header__meta">
+          <span class="section-label">Ensayo</span>
+          <span class="essay-header__fecha">·</span>
+          <!-- ✏️ Fecha: "Mar 2025" -->
+          <span class="essay-header__fecha">Mar 2026</span>
+        </div>
+        <!-- ✏️ Título del ensayo -->
+        <h1 class="essay-header__title">Guía de Reportes Científicos</h1>
+        <!-- ✏️ Extracto o subtítulo. Elimina si no lo necesitas. -->
+        <p class="essay-header__extracto">
+          Se propone una iniciativa de una guía para el desarrollo de reportes científicos basado en la recopilación de contenido de diversa literatura consultada.
+        </p>
+      </header>
+
+      <!-- ════════════════════════════════════════
+           CUERPO DEL ENSAYO
+           ✏️ Escribe aquí el ensayo.
+           Usa <h2> para secciones, <h3> para subsecciones.
+           Usa <blockquote> para citas largas.
+           Usa <hr> para separar partes.
+           El primer párrafo puede tener class="drop-cap"
+           para la primera letra decorativa (opcional).
+      ════════════════════════════════════════ -->
+      <div class="essay-body">
+
+        <!--
+          ✏️ SECCIÓN 1 — Introducción
+          Puedes quitar los <h2> si el ensayo es corto y fluye sin secciones.
+        -->
+        <h2>✏️ Título de la primera sección</h2>
+
+        <p class="drop-cap">
+          ✏️ Primer párrafo del ensayo. Puedes usar class="drop-cap" para
+          que la primera letra sea más grande. Es opcional y decorativo.
+          Empieza con la idea más importante o con la pregunta que va a
+          guiar todo el texto.
+        </p>
+
+        <p>
+          ✏️ Segundo párrafo. Desarrolla la idea del primero. Sé concreto:
+          si hablas de un fenómeno físico, dalo por nombre. Si hablas de
+          una ecuación, menciónala. La vaguedad no ayuda al lector.
+        </p>
+
+        <!--
+          ✏️ CITA (opcional)
+          Usa blockquote para citas largas o ideas que quieras destacar.
+        -->
+        <blockquote>
+          ✏️ "Una cita relevante de alguien más, o una afirmación propia
+          que quieras enfatizar visualmente."
+          — ✏️ Fuente o autor
+        </blockquote>
+
+        <!--
+          ✏️ SECCIÓN 2
+        -->
+        <h2>✏️ Segunda sección</h2>
+
+        <p>
+          ✏️ Continúa el argumento. Cada sección debe avanzar, no repetir
+          lo que ya dijiste. Pregúntate: ¿qué añade este párrafo que el
+          anterior no tenía?
+        </p>
+
+        <p>
+          ✏️ Párrafo de cierre de la sección.
+        </p>
+
+        <!-- ✏️ Separador entre secciones (opcional) -->
+        <hr />
+
+        <!--
+          ✏️ CONCLUSIÓN
+        -->
+        <h2>✏️ Conclusión (o título que elijas)</h2>
+
+        <p>
+          ✏️ Cierra el ensayo. No resumas lo que ya dijiste — lleva al
+          lector a una idea nueva que emerge de todo lo anterior. Una
+          buena conclusión deja algo en qué pensar.
+        </p>
+
+        <!--
+          ✏️ Para agregar más secciones copia el patrón:
+          <h2>Título</h2>
+          <p>Contenido...</p>
+
+          Para eliminar secciones, borra el bloque completo.
+        -->
+
+      </div><!-- /essay-body -->
+
+      <!-- ── Separador visual antes del PDF ── -->
+      <div class="pdf-sep">
+        <span class="pdf-sep__label">Versión en PDF</span>
+      </div>
+
+      <!-- ════════════════════════════════════════
+           VISOR PDF
+           El PDF siempre se llama ensayo.pdf
+           y vive en la misma carpeta que este index.html.
+           Solo cambia el título del atributo download.
+      ════════════════════════════════════════ -->
+      <div class="pdf-section">
+        <div class="pdf-section__header">
+          <h2 class="pdf-section__title">Leer en PDF</h2>
+          <!-- ✏️ Cambia solo el nombre del archivo en download="" -->
+          <a href="EXPManual.pdf"
+             download="EXPManual.pdf"
+             class="btn-download">
+            ↓ Descargar PDF
+          </a>
+        </div>
+
+        <div class="pdf-viewer">
+          <iframe src="EXPManual.pdf" title="Guía de Reportes Científicos" id="pdf-iframe"></iframe>
+          <div class="pdf-fallback" id="pdf-fallback">
+            Tu navegador no puede mostrar el PDF en línea.<br>
+            <a href="EXPManual.pdf" download class="cta"
+               style="margin-top:var(--space-4);display:inline-flex;">
+              Descárgalo aquí <span class="arrow">→</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer__inner">
+      <p class="footer__copy">Marcelo Ixquiac &copy; 2025</p>
+      <div class="footer__links">
+        <a href="mailto:tu@email.com"             class="footer__link">Email</a>
+        <a href="https://github.com/tuusuario"     class="footer__link" target="_blank">GitHub</a>
+        <a href="https://linkedin.com/in/tuperfil" class="footer__link" target="_blank">LinkedIn</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('scrolled', window.scrollY > 10);
+    }, { passive: true });
+
+    const iframe = document.getElementById('pdf-iframe');
+    if (iframe) {
+      iframe.addEventListener('error', () => {
+        iframe.style.display = 'none';
+        document.getElementById('pdf-fallback').style.display = 'block';
+      });
+    }
+  </script>
+
+</body>
+</html>
