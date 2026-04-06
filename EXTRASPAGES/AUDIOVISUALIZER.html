@@ -260,9 +260,11 @@ canvas#c { position: fixed; inset: 0; }
 /* ═══════════ CONTROLES EXTRA (pausa, ganancia) ═══════════ */
 #extra-controls {
   position: fixed; top: 18px; right: 18px; z-index: 100;
-  display: none; flex-direction: column; align-items: flex-end; gap: 10px;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
 }
-#extra-controls.show { display: flex; }
+#extra-controls.show { opacity: 1; pointer-events: all; }
 
 .ctrl-btn {
   font-family: 'JetBrains Mono', monospace;
@@ -514,6 +516,7 @@ canvas#c { position: fixed; inset: 0; }
 
 <!-- ═══════════ CONTROLES EXTRA ═══════════ -->
 <div id="extra-controls">
+  <button class="ctrl-btn" id="btnFullscreen">⛶ Pantalla Completa</button>
   <button class="ctrl-btn" id="btnPause">⏸ Pausa</button>
   <div id="gain-wrap">
     <span class="gain-lbl">Gain</span>
@@ -617,7 +620,8 @@ async function initAudio(stream) {
 
   // Mostrar controles
   document.getElementById('nav-wrap').classList.add('show');
-  document.getElementById('extra-controls').classList.add('show');
+  extraVisible = true;
+  extraCtrl.classList.add('show');
   document.getElementById('audio-meter').classList.add('show');
   document.getElementById('lbl-wrap').style.display = 'flex';
 
@@ -665,6 +669,27 @@ gainSlider.addEventListener('input', () => {
   gainVal.textContent = gainMultiplier.toFixed(1) + '×';
   if (gainNode) gainNode.gain.value = gainMultiplier;
 });
+
+/* ═══════════════════════════════════════════════════════
+   PANTALLA COMPLETA
+═══════════════════════════════════════════════════════ */
+const btnFullscreen = document.getElementById('btnFullscreen');
+
+function updateFullscreenLabel() {
+  const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+  btnFullscreen.textContent = isFs ? '✕ Salir Pantalla Completa' : '⛶ Pantalla Completa';
+}
+
+btnFullscreen.addEventListener('click', () => {
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen).call(document.documentElement);
+  } else {
+    (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+  }
+});
+
+document.addEventListener('fullscreenchange', updateFullscreenLabel);
+document.addEventListener('webkitfullscreenchange', updateFullscreenLabel);
 
 /* ═══════════════════════════════════════════════════════
    PAUSA
@@ -770,20 +795,42 @@ const VIZ_LABELS = {
 let currentViz = 'fourier';
 let navHideTimer;
 
-const navWrap = document.getElementById('nav-wrap');
+const navWrap     = document.getElementById('nav-wrap');
+const extraCtrl   = document.getElementById('extra-controls');
+let extraVisible  = false;
 
 function showNav() {
   navWrap.classList.add('show');
+  if (extraVisible) {
+    extraCtrl.classList.add('show');
+  }
   clearTimeout(navHideTimer);
-  navHideTimer = setTimeout(() => navWrap.classList.remove('show'), 3200);
+  navHideTimer = setTimeout(() => {
+    navWrap.classList.remove('show');
+    extraCtrl.classList.remove('show');
+  }, 3200);
 }
 
 navWrap.addEventListener('mouseenter', () => {
   navWrap.classList.add('show');
+  if (extraVisible) extraCtrl.classList.add('show');
   clearTimeout(navHideTimer);
 });
 navWrap.addEventListener('mouseleave', () => {
-  navHideTimer = setTimeout(() => navWrap.classList.remove('show'), 1000);
+  navHideTimer = setTimeout(() => {
+    navWrap.classList.remove('show');
+    extraCtrl.classList.remove('show');
+  }, 1000);
+});
+extraCtrl.addEventListener('mouseenter', () => {
+  extraCtrl.classList.add('show');
+  clearTimeout(navHideTimer);
+});
+extraCtrl.addEventListener('mouseleave', () => {
+  navHideTimer = setTimeout(() => {
+    navWrap.classList.remove('show');
+    extraCtrl.classList.remove('show');
+  }, 1000);
 });
 document.addEventListener('mousemove', showNav);
 
