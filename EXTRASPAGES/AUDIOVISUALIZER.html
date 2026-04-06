@@ -1,0 +1,1877 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>∿ Visualizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@300;400;700&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+/* ═══════════ VARIABLES ═══════════ */
+:root {
+  --bg: #01010c;
+  --glass: rgba(6, 8, 22, 0.78);
+  --border: rgba(255, 255, 255, 0.07);
+  --border-hi: rgba(255, 255, 255, 0.44);
+  --txt: rgba(255, 255, 255, 0.9);
+  --txt-dim: rgba(255, 255, 255, 0.28);
+  --accent: #5fa8d8;
+  --accent-rgb: 95, 168, 216;
+}
+
+/* ═══════════ RESET ═══════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); touch-action: none; }
+canvas#c { position: fixed; inset: 0; }
+
+/* ═══════════ OVERLAY ═══════════ */
+#overlay {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse 90% 70% at 50% 54%, #050420 0%, #01010c 100%);
+  transition: opacity 0.65s ease;
+}
+#overlay.fade-out { opacity: 0; pointer-events: none; }
+
+.ov-halo {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -52%);
+  width: 440px; height: 440px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(65, 105, 215, 0.07) 0%, transparent 70%);
+  animation: halopulse 5s ease-in-out infinite;
+}
+.ov-ring {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -52%);
+  width: 310px; height: 310px; border-radius: 50%;
+  border: 1px solid rgba(75, 125, 195, 0.07);
+  animation: ringspin 45s linear infinite;
+}
+
+@keyframes halopulse {
+  0%, 100% { transform: translate(-50%, -52%) scale(1); opacity: 0.45; }
+  50%       { transform: translate(-50%, -52%) scale(1.2); opacity: 1; }
+}
+@keyframes ringspin { to { transform: translate(-50%, -52%) rotate(360deg); } }
+
+.ov-symbol {
+  font-family: 'Syne', sans-serif; font-weight: 700;
+  font-size: clamp(3.5rem, 9vw, 6rem);
+  background: linear-gradient(140deg, #3a7dbf 0%, #7ab2d4 38%, #c5e4f0 66%, #5a9ec5 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  filter: drop-shadow(0 0 55px rgba(85, 150, 200, 0.38));
+  margin-bottom: 14px; position: relative; z-index: 1;
+}
+.ov-title {
+  font-family: 'JetBrains Mono', monospace; font-weight: 300;
+  font-size: clamp(0.54rem, 1.2vw, 0.72rem); letter-spacing: 0.56em; text-transform: uppercase;
+  color: var(--txt-dim); margin-right: -0.56em; margin-bottom: 46px; position: relative; z-index: 1;
+}
+.ov-sep {
+  width: 1px; height: 50px;
+  background: linear-gradient(to bottom, transparent, rgba(88, 148, 198, 0.17), transparent);
+  margin-bottom: 42px;
+}
+.ov-btns { display: flex; flex-direction: column; align-items: center; gap: 14px; position: relative; z-index: 1; }
+
+.btn-main {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.62rem;
+  letter-spacing: 0.3em; text-transform: uppercase;
+  padding: 14px 42px; background: transparent; cursor: pointer;
+  border: 1px solid rgba(95, 168, 216, 0.45); color: rgba(95, 168, 216, 0.92);
+  transition: all 0.22s; position: relative; overflow: hidden;
+}
+.btn-main::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, transparent 45%, rgba(95, 168, 216, 0.06));
+  opacity: 0; transition: opacity 0.22s;
+}
+.btn-main:hover { border-color: rgba(95, 168, 216, 0.88); color: #fff; }
+.btn-main:hover::after { opacity: 1; }
+.btn-main:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.btn-alt {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.54rem;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  padding: 9px 28px; background: transparent; cursor: pointer;
+  border: 1px solid var(--border); color: var(--txt-dim); transition: all 0.22s;
+}
+.btn-alt:hover { color: rgba(255, 255, 255, 0.52); border-color: rgba(255, 255, 255, 0.15); }
+.btn-alt:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.ov-note {
+  margin-top: 38px; position: relative; z-index: 1;
+  font-family: 'JetBrains Mono', monospace; font-size: 0.5rem;
+  color: rgba(255, 255, 255, 0.1); letter-spacing: 0.1em; text-align: center; line-height: 2.5;
+}
+.ov-note b { color: rgba(255, 255, 255, 0.2); font-weight: 400; }
+
+/* ═══════════ TOAST (reemplaza alert) ═══════════ */
+#toast {
+  position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px);
+  z-index: 999; padding: 12px 24px;
+  background: rgba(10, 4, 30, 0.9); border: 1px solid rgba(220, 80, 80, 0.4);
+  font-family: 'JetBrains Mono', monospace; font-size: 0.55rem;
+  color: rgba(255, 150, 150, 0.9); letter-spacing: 0.1em;
+  backdrop-filter: blur(14px); max-width: 360px; text-align: center;
+  opacity: 0; transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ═══════════ NAV ═══════════ */
+#nav-wrap {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  padding: 10px 16px 28px;
+  background: linear-gradient(transparent, rgba(1, 1, 15, 0.97) 52%);
+  opacity: 0; transition: opacity 0.3s ease; pointer-events: none;
+}
+#nav-wrap.show { opacity: 1; pointer-events: all; }
+
+#field-row {
+  display: none; align-items: center; gap: 6px;
+  flex-wrap: wrap; justify-content: center;
+}
+#field-row.on { display: flex; }
+.field-lbl {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.46rem;
+  letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.16); margin-right: 4px;
+}
+#nav-main { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; }
+
+/* Botones de visualizador */
+.vbtn {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.57rem;
+  letter-spacing: 0.13em; text-transform: uppercase;
+  padding: 7px 15px; border: 1px solid var(--border);
+  background: rgba(4, 6, 20, 0.74); backdrop-filter: blur(14px);
+  color: var(--txt-dim); cursor: pointer; border-radius: 2px;
+  transition: all 0.22s; outline: none;
+  /* touch friendly */
+  min-height: 36px; min-width: 44px;
+}
+.vbtn:hover { color: rgba(255, 255, 255, 0.72); border-color: rgba(255, 255, 255, 0.2); }
+.vbtn.on {
+  color: #fff; border-color: var(--border-hi);
+  background: rgba(95, 168, 216, 0.1);
+  box-shadow: 0 0 22px rgba(95, 168, 216, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Botones de campo */
+.fbtn {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.5rem;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 5px 12px; border: 1px solid var(--border);
+  background: rgba(4, 6, 20, 0.68); backdrop-filter: blur(14px);
+  color: var(--txt-dim); cursor: pointer; border-radius: 2px;
+  transition: all 0.2s; outline: none;
+  min-height: 32px; min-width: 44px;
+}
+.fbtn:hover { color: rgba(255, 255, 255, 0.6); border-color: rgba(200, 170, 255, 0.22); }
+.fbtn.on {
+  color: #d4c0ff; border-color: rgba(175, 135, 255, 0.5);
+  background: rgba(155, 115, 255, 0.1); box-shadow: 0 0 16px rgba(155, 115, 255, 0.12);
+}
+
+/* ═══════════ CONTROLES EXTRA (pausa, ganancia) ═══════════ */
+#extra-controls {
+  position: fixed; top: 18px; right: 18px; z-index: 100;
+  display: none; flex-direction: column; align-items: flex-end; gap: 10px;
+}
+#extra-controls.show { display: flex; }
+
+.ctrl-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.52rem;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 7px 14px; border: 1px solid var(--border);
+  background: rgba(4, 6, 20, 0.74); backdrop-filter: blur(14px);
+  color: var(--txt-dim); cursor: pointer; border-radius: 2px;
+  transition: all 0.22s; outline: none; min-height: 34px;
+}
+.ctrl-btn:hover { color: rgba(255, 255, 255, 0.7); border-color: rgba(255, 255, 255, 0.2); }
+.ctrl-btn.paused { color: #ffd080; border-color: rgba(255, 208, 128, 0.45); }
+
+#gain-wrap {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(4, 6, 20, 0.74); backdrop-filter: blur(14px);
+  border: 1px solid var(--border); border-radius: 2px;
+  padding: 6px 12px;
+}
+.gain-lbl {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.46rem;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.2);
+}
+#gain-slider {
+  -webkit-appearance: none; appearance: none;
+  width: 80px; height: 2px;
+  background: rgba(255, 255, 255, 0.08); border-radius: 2px; outline: none; cursor: pointer;
+}
+#gain-slider::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 10px; height: 10px;
+  border-radius: 50%; background: var(--accent); cursor: pointer;
+}
+#gain-slider::-moz-range-thumb {
+  width: 10px; height: 10px; border-radius: 50%; background: var(--accent);
+  border: none; cursor: pointer;
+}
+#gain-val {
+  font-family: 'JetBrains Mono', monospace; font-size: 0.46rem;
+  color: rgba(255, 255, 255, 0.3); min-width: 26px; text-align: right;
+}
+
+/* ═══════════ INDICADOR DE NIVEL DE AUDIO ═══════════ */
+#audio-meter {
+  position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+  z-index: 100; display: none; align-items: center; gap: 4px; pointer-events: none;
+}
+#audio-meter.show { display: flex; }
+.meter-bar {
+  width: 3px; border-radius: 1px;
+  background: rgba(var(--accent-rgb), 0.3);
+  transition: height 0.05s ease;
+}
+
+/* ═══════════ ETIQUETA DEL VISUALIZADOR ═══════════ */
+#lbl-wrap {
+  position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+  z-index: 100; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  transition: opacity 0.4s ease;
+}
+#lbl-name {
+  font-family: 'Syne', sans-serif; font-weight: 400;
+  font-size: 0.8rem; letter-spacing: 0.28em; text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(1, 2, 18, 0.8); backdrop-filter: blur(14px);
+  padding: 7px 24px 6px; border: 1px solid rgba(255, 255, 255, 0.08);
+  text-shadow: 0 0 26px rgba(145, 195, 255, 0.32); white-space: nowrap;
+}
+#lbl-idx {
+  font-family: 'JetBrains Mono', monospace; font-weight: 300;
+  font-size: 0.42rem; letter-spacing: 0.52em; color: rgba(255, 255, 255, 0.16);
+}
+
+/* ═══════════ RESPONSIVE MOBILE ═══════════ */
+@media (max-width: 600px) {
+  .vbtn { font-size: 0.5rem; padding: 8px 10px; letter-spacing: 0.06em; }
+  .fbtn { font-size: 0.46rem; padding: 6px 8px; }
+  #extra-controls { top: auto; bottom: 100px; right: 12px; }
+  #gain-wrap { padding: 6px 8px; }
+  #gain-slider { width: 60px; }
+  .ov-halo, .ov-ring { width: 280px; height: 280px; }
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<!-- ═══════════ OVERLAY DE INICIO ═══════════ -->
+<div id="overlay">
+  <div class="ov-halo"></div>
+  <div class="ov-ring"></div>
+  <div class="ov-symbol">∿</div>
+  <p class="ov-title">Audio Visualizer</p>
+  <div class="ov-sep"></div>
+  <div class="ov-btns">
+    <button class="btn-main" id="btnScreen">Compartir pestaña + audio</button>
+    <button class="btn-alt"  id="btnMic">o usar el micrófono</button>
+  </div>
+  <p class="ov-note">
+    <b>Chrome:</b> elige una pestaña → activa "Compartir audio de la pestaña"<br>
+    Cambia con teclas <b>1 – 9</b> &nbsp;·&nbsp; <b>0</b> = Espectro &nbsp;·&nbsp; mueve el ratón para los controles
+  </p>
+</div>
+
+<!-- ═══════════ TOAST DE ERROR ═══════════ -->
+<div id="toast"></div>
+
+<!-- ═══════════ NAVEGACIÓN INFERIOR ═══════════ -->
+<div id="nav-wrap">
+  <div id="field-row">
+    <span class="field-lbl">Campo ›</span>
+    <button class="fbtn on" data-f="ruido">Ruido</button>
+    <button class="fbtn" data-f="vortice">Vórtice</button>
+    <button class="fbtn" data-f="dipolo">Dipolo</button>
+    <button class="fbtn" data-f="silla">Silla</button>
+    <button class="fbtn" data-f="espiral">Espiral</button>
+    <button class="fbtn" data-f="atractores">Atractores</button>
+    <button class="fbtn" data-f="cuadrupolo">Cuadrupolo</button>
+  </div>
+  <div id="nav-main">
+    <button class="vbtn on" data-v="fourier">1 · Epiciclos</button>
+    <button class="vbtn" data-v="lorenz">2 · Lorenz</button>
+    <button class="vbtn" data-v="lissajous">3 · Lissajous</button>
+    <button class="vbtn" data-v="polar">4 · Pétalos</button>
+    <button class="vbtn" data-v="particles">5 · Partículas</button>
+    <button class="vbtn" data-v="chladni">6 · Chladni</button>
+    <button class="vbtn" data-v="hyperbolic">7 · Hiperbólico</button>
+    <button class="vbtn" data-v="fibonacci">8 · Nautilus</button>
+    <button class="vbtn" data-v="fifths">9 · Quintas</button>
+    <button class="vbtn" data-v="spectrum">0 · Espectro</button>
+  </div>
+</div>
+
+<!-- ═══════════ ETIQUETA DEL VISUALIZADOR ═══════════ -->
+<div id="lbl-wrap">
+  <div id="lbl-name">Epiciclos de Fourier</div>
+  <div id="lbl-idx">01 / 09</div>
+</div>
+
+<!-- ═══════════ CONTROLES EXTRA ═══════════ -->
+<div id="extra-controls">
+  <button class="ctrl-btn" id="btnPause">⏸ Pausa</button>
+  <div id="gain-wrap">
+    <span class="gain-lbl">Gain</span>
+    <input id="gain-slider" type="range" min="1" max="400" value="100" step="1">
+    <span id="gain-val">1×</span>
+  </div>
+</div>
+
+<!-- ═══════════ MEDIDOR DE AUDIO ═══════════ -->
+<div id="audio-meter">
+  <!-- generado por JS -->
+</div>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════
+   CANVAS
+═══════════════════════════════════════════════════════ */
+const canvas = document.getElementById('c');
+const ctx    = canvas.getContext('2d');
+let canvasW  = 0;
+let canvasH  = 0;
+
+// chDirty se declara antes de resize para evitar el bug de referencia anticipada
+let chladniDirty = true;
+
+const resize = () => {
+  canvasW = canvas.width  = window.innerWidth;
+  canvasH = canvas.height = window.innerHeight;
+  chladniDirty = true;
+};
+resize();
+window.addEventListener('resize', resize);
+
+/* ═══════════════════════════════════════════════════════
+   TOAST (reemplaza alert)
+═══════════════════════════════════════════════════════ */
+let toastTimer = null;
+function showToast(msg, duration = 4000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), duration);
+}
+
+/* ═══════════════════════════════════════════════════════
+   AUDIO
+═══════════════════════════════════════════════════════ */
+let analyser      = null;
+let freqData      = null;
+let timeData      = null;
+let freqBinCount  = 0;
+let sampleRate    = 44100;
+let gainNode      = null;
+let audioCtx      = null;
+let activeStream  = null;
+let audioReady    = false;
+
+async function initAudio(stream) {
+  if (!stream.getAudioTracks().length) {
+    showToast('Sin audio detectado. En Chrome: elige una pestaña y activa "Compartir audio de la pestaña".');
+    return;
+  }
+
+  // Limpiar stream anterior si existe
+  if (activeStream) {
+    activeStream.getTracks().forEach(t => t.stop());
+  }
+  if (audioCtx) {
+    await audioCtx.close();
+  }
+
+  activeStream = stream;
+  audioCtx     = new (window.AudioContext || window.webkitAudioContext)();
+  sampleRate   = audioCtx.sampleRate;
+
+  const source = audioCtx.createMediaStreamSource(stream);
+
+  gainNode = audioCtx.createGain();
+  gainNode.gain.value = gainMultiplier;
+
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize               = 4096;
+  analyser.smoothingTimeConstant = 0.82;
+
+  source.connect(gainNode);
+  gainNode.connect(analyser);
+
+  freqBinCount = analyser.frequencyBinCount;
+  freqData     = new Uint8Array(freqBinCount);
+  timeData     = new Uint8Array(analyser.fftSize);
+
+  audioReady = true;
+
+  // Ocultar overlay con fade, luego remover
+  const overlay = document.getElementById('overlay');
+  overlay.classList.add('fade-out');
+  setTimeout(() => overlay.remove(), 700);
+
+  // Mostrar controles
+  document.getElementById('nav-wrap').classList.add('show');
+  document.getElementById('extra-controls').classList.add('show');
+  document.getElementById('audio-meter').classList.add('show');
+  document.getElementById('lbl-wrap').style.display = 'flex';
+
+  if (!loopStarted) {
+    loopStarted = true;
+    requestAnimationFrame(renderLoop);
+  }
+}
+
+// Proteger contra doble-click: deshabilitar botones mientras se inicia
+function withButtonGuard(btnId, asyncFn) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = true;
+  asyncFn().catch(err => {
+    showToast('Error: ' + (err.message || String(err)));
+  }).finally(() => {
+    btn.disabled = false;
+  });
+}
+
+document.getElementById('btnScreen').addEventListener('click', () => {
+  withButtonGuard('btnScreen', async () => {
+    const stream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: { width: 1, height: 1 } });
+    await initAudio(stream);
+  });
+});
+
+document.getElementById('btnMic').addEventListener('click', () => {
+  withButtonGuard('btnMic', async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    await initAudio(stream);
+  });
+});
+
+/* ═══════════════════════════════════════════════════════
+   GANANCIA
+═══════════════════════════════════════════════════════ */
+let gainMultiplier = 1.0;
+
+const gainSlider = document.getElementById('gain-slider');
+const gainVal    = document.getElementById('gain-val');
+
+gainSlider.addEventListener('input', () => {
+  gainMultiplier = gainSlider.value / 100;
+  gainVal.textContent = gainMultiplier.toFixed(1) + '×';
+  if (gainNode) gainNode.gain.value = gainMultiplier;
+});
+
+/* ═══════════════════════════════════════════════════════
+   PAUSA
+═══════════════════════════════════════════════════════ */
+let paused = false;
+const btnPause = document.getElementById('btnPause');
+
+btnPause.addEventListener('click', () => {
+  paused = !paused;
+  btnPause.textContent = paused ? '▶ Reanudar' : '⏸ Pausa';
+  btnPause.classList.toggle('paused', paused);
+});
+
+/* ═══════════════════════════════════════════════════════
+   MEDIDOR DE AUDIO (barras en la parte superior)
+═══════════════════════════════════════════════════════ */
+const METER_BARS    = 12;
+const meterEl       = document.getElementById('audio-meter');
+const meterBarEls   = [];
+
+for (let i = 0; i < METER_BARS; i++) {
+  const bar = document.createElement('div');
+  bar.className = 'meter-bar';
+  bar.style.height = '4px';
+  meterEl.appendChild(bar);
+  meterBarEls.push(bar);
+}
+
+function updateMeter() {
+  if (!freqData) return;
+  const step = Math.floor(freqBinCount / METER_BARS);
+  for (let i = 0; i < METER_BARS; i++) {
+    let sum = 0;
+    for (let j = i * step; j < (i + 1) * step && j < freqBinCount; j++) {
+      sum += freqData[j];
+    }
+    const avg = sum / (step * 255);
+    const h = Math.max(4, Math.round(avg * 28));
+    meterBarEls[i].style.height = h + 'px';
+    meterBarEls[i].style.background = `hsla(${200 + i * 10}, 70%, ${45 + avg * 30}%, ${0.3 + avg * 0.7})`;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   HELPERS DE AUDIO
+   Se aceptan valores de 0..1 normalizados
+═══════════════════════════════════════════════════════ */
+function energy(lo, hi) {
+  if (!freqData) return 0;
+  let sum = 0;
+  const end = Math.min(hi, freqBinCount);
+  for (let i = lo; i < end; i++) sum += freqData[i];
+  return sum / ((end - lo) * 255);
+}
+
+function getBass()   { return energy(2, 12);   }
+function getMid()    { return energy(12, 100);  }
+function getHi()     { return energy(100, 500); }
+function getVol()    { return energy(0, freqBinCount); }
+
+function getDomHz() {
+  if (!freqData) return 440;
+  let max = 0, idx = 2;
+  for (let i = 2; i < freqBinCount; i++) {
+    if (freqData[i] > max) { max = freqData[i]; idx = i; }
+  }
+  return idx * sampleRate / analyser.fftSize;
+}
+
+function noteEnergies() {
+  const ne = new Float32Array(12);
+  if (!freqData || !analyser) return ne;
+  const binHz = sampleRate / analyser.fftSize;
+  const lo    = Math.ceil(80 / binHz);
+  const hi    = Math.min(Math.floor(2600 / binHz), freqBinCount - 1);
+  for (let i = lo; i <= hi; i++) {
+    const note = ((Math.round(12 * Math.log2(i * binHz / 440) + 69) % 12) + 12) % 12;
+    ne[note] += freqData[i] / 255;
+  }
+  let max = 0;
+  for (let i = 0; i < 12; i++) if (ne[i] > max) max = ne[i];
+  if (max > 0) for (let i = 0; i < 12; i++) ne[i] /= max;
+  return ne;
+}
+
+/* ═══════════════════════════════════════════════════════
+   NAVEGACIÓN DE VISUALIZADORES
+═══════════════════════════════════════════════════════ */
+const VIZ_LIST = ['fourier', 'lorenz', 'lissajous', 'polar', 'particles', 'chladni', 'hyperbolic', 'fibonacci', 'fifths', 'spectrum'];
+const VIZ_LABELS = {
+  fourier:    'Epiciclos de Fourier',
+  lorenz:     'Atractor de Lorenz',
+  lissajous:  'Figuras de Lissajous',
+  polar:      'Curvas Polares',
+  particles:  'Campo de Partículas',
+  chladni:    'Figuras de Chladni',
+  hyperbolic: 'Geometría Hiperbólica',
+  fibonacci:  'Espiral de Fibonacci',
+  fifths:     'Círculo de Quintas',
+  spectrum:   'Espectro de Fourier',
+};
+
+let currentViz = 'fourier';
+let navHideTimer;
+
+const navWrap = document.getElementById('nav-wrap');
+
+function showNav() {
+  navWrap.classList.add('show');
+  clearTimeout(navHideTimer);
+  navHideTimer = setTimeout(() => navWrap.classList.remove('show'), 3200);
+}
+
+navWrap.addEventListener('mouseenter', () => {
+  navWrap.classList.add('show');
+  clearTimeout(navHideTimer);
+});
+navWrap.addEventListener('mouseleave', () => {
+  navHideTimer = setTimeout(() => navWrap.classList.remove('show'), 1000);
+});
+document.addEventListener('mousemove', showNav);
+
+// Touch: mostrar nav al tocar la pantalla
+document.addEventListener('touchstart', showNav, { passive: true });
+
+function setViz(vizKey) {
+  if (!VIZ_LABELS[vizKey]) return;
+  currentViz = vizKey;
+
+  document.querySelectorAll('#nav-main .vbtn').forEach(b => {
+    b.classList.toggle('on', b.dataset.v === vizKey);
+  });
+
+  const idx = VIZ_LIST.indexOf(vizKey) + 1;
+  document.getElementById('lbl-name').textContent = VIZ_LABELS[vizKey];
+  document.getElementById('lbl-idx').textContent  = String(idx).padStart(2, '0') + ' / 10';
+  document.getElementById('field-row').classList.toggle('on', vizKey === 'particles');
+
+  resetAllState();
+  showNav();
+}
+
+document.querySelectorAll('#nav-main .vbtn').forEach(b => {
+  b.addEventListener('click', () => setViz(b.dataset.v));
+});
+
+document.addEventListener('keydown', e => {
+  const KEY_MAP = {
+    '1': 'fourier', '2': 'lorenz',  '3': 'lissajous', '4': 'polar',
+    '5': 'particles', '6': 'chladni', '7': 'hyperbolic', '8': 'fibonacci', '9': 'fifths',
+    '0': 'spectrum',
+    ' ': null, // espacio = pausa
+  };
+  if (e.key === ' ') {
+    btnPause.click();
+    e.preventDefault();
+    return;
+  }
+  if (KEY_MAP[e.key]) setViz(KEY_MAP[e.key]);
+});
+
+/* ═══════════════════════════════════════════════════════
+   CAMPO DE PARTÍCULAS
+═══════════════════════════════════════════════════════ */
+let currentField = 'ruido';
+
+document.querySelectorAll('.fbtn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.fbtn').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    currentField = b.dataset.f;
+    particles = [];
+  });
+});
+
+/* ═══════════════════════════════════════════════════════
+   RESET DE ESTADO (completo: todos los visualizadores)
+═══════════════════════════════════════════════════════ */
+function resetAllState() {
+  // Fourier
+  fourierTrace = [];
+
+  // Lorenz
+  lorenzPts = []; lorenzX = 0.1; lorenzY = 0; lorenzZ = 0; lorenzAngle = 0;
+
+  // Lissajous
+  lissajousPhase = 0;
+
+  // Polar
+  polarTheta = 0;
+
+  // Partículas
+  particles = [];
+  trails = [];
+  particleTime = 0;
+
+  // Chladni
+  chladniDirty = true;
+
+  // Hiperbólico
+  hypPtcls = []; hypTime = 0; hypGeo = null;
+
+  // Fibonacci
+  fibTime = 0;
+
+  // Quintas
+  fifthsTime = 0;
+  cofSmooth.fill(0);
+
+  // Espectro
+  specTime = 0;
+  specSmooth    = null;
+  specPeaks     = null;
+  specPeakHold  = null;
+  specPeakDecay = null;
+}
+
+/* ═══════════════════════════════════════════════════════
+   VIZ 1 · EPICICLOS DE FOURIER
+═══════════════════════════════════════════════════════ */
+let fourierTrace = [];
+ 
+function drawFourier(t) {
+  const bass = getBass(), vol = getVol();
+  ctx.fillStyle = 'rgba(1,1,14,0.18)';
+  ctx.fillRect(0, 0, canvasW, canvasH);
+ 
+  const N  = 28;
+  const cx = canvasW / 2;
+  const cy = canvasH / 2;
+  const R  = Math.min(canvasW, canvasH) * 0.27;
+  let x = cx, y = cy;
+ 
+  for (let i = 1; i <= N; i++) {
+    const amp = (freqData ? freqData[Math.floor(i * freqBinCount / (N * 3))] / 255 : 0.3) * R / i + R * 0.013 / i;
+    const ang = i * t * 0.52;
+    const nx = x + amp * Math.cos(ang);
+    const ny = y + amp * Math.sin(ang);
+    const alpha = 1 - i / N;
+ 
+    ctx.beginPath();
+    ctx.arc(x, y, amp, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(48,108,202,${0.04 + alpha * 0.02})`;
+    ctx.lineWidth = 0.5;
+    ctx.stroke();
+ 
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(nx, ny);
+    ctx.strokeStyle = `rgba(112,182,255,${0.14 + alpha * 0.53})`;
+    ctx.lineWidth = 0.6 + alpha * 0.7;
+    ctx.stroke();
+ 
+    x = nx; y = ny;
+  }
+ 
+  fourierTrace.unshift({ x, y });
+  if (fourierTrace.length > 1200) fourierTrace.pop();
+ 
+  if (fourierTrace.length > 2) {
+    ctx.beginPath();
+    ctx.moveTo(fourierTrace[0].x, fourierTrace[0].y);
+    for (let i = 1; i < fourierTrace.length; i++) {
+      ctx.lineTo(fourierTrace[i].x, fourierTrace[i].y);
+    }
+    const traceColor = `hsl(${192 + vol * 62},96%,68%)`;
+    ctx.strokeStyle   = traceColor;
+    ctx.lineWidth     = 1.7;
+    ctx.shadowColor   = traceColor;
+    ctx.shadowBlur    = 15;
+    ctx.stroke();
+    ctx.shadowBlur    = 0;
+  }
+ 
+  ctx.beginPath();
+  ctx.arc(x, y, 2.8, 0, Math.PI * 2);
+  ctx.fillStyle = '#d0eeff';
+  ctx.fill();
+}
+
+/* ═══════════════════════════════════════════════════════
+   VIZ 2 · ATRACTOR DE LORENZ
+═══════════════════════════════════════════════════════ */
+let lorenzPts   = [];
+let lorenzX     = 0.1;
+let lorenzY     = 0;
+let lorenzZ     = 0;
+let lorenzAngle = 0;
+
+function drawLorenz() {
+  const bass = getBass(), mid = getMid();
+  ctx.fillStyle = 'rgba(3,1,14,0.07)';
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  const sigma = 10, beta = 8 / 3;
+  const rho   = 22 + bass * 20 + mid * 5;
+  const dt    = 0.005;
+
+  for (let s = 0; s < 8; s++) {
+    const dx = sigma * (lorenzY - lorenzX);
+    const dy = lorenzX * (rho - lorenzZ) - lorenzY;
+    const dz = lorenzX * lorenzY - beta * lorenzZ;
+    lorenzX += dx * dt; lorenzY += dy * dt; lorenzZ += dz * dt;
+    lorenzPts.push([lorenzX, lorenzY, lorenzZ]);
+  }
+  if (lorenzPts.length > 2600) lorenzPts.splice(0, 8);
+
+  lorenzAngle += 0.0016 + bass * 0.008;
+  const ca = Math.cos(lorenzAngle), sa = Math.sin(lorenzAngle);
+  const sc = Math.min(canvasW, canvasH) * 0.011;
+  const cx = canvasW / 2, cy = canvasH / 2 + 25;
+
+  for (let i = 1; i < lorenzPts.length; i++) {
+    const t = i / lorenzPts.length;
+    const [px, py, pz] = lorenzPts[i];
+    const [qx, qy, qz] = lorenzPts[i - 1];
+
+    ctx.beginPath();
+    ctx.moveTo(cx + (qx * ca - qy * sa) * sc, cy + ((qx * sa + qy * ca) * 0.5 - (qz - 25)) * sc);
+    ctx.lineTo(cx + (px * ca - py * sa) * sc, cy + ((px * sa + py * ca) * 0.5 - (pz - 25)) * sc);
+    ctx.strokeStyle = `hsla(${262 + t * 88 + mid * 40},80%,${36 + t * 38}%,${t * 0.82})`;
+    ctx.lineWidth   = 0.4 + t * 0.9;
+    ctx.stroke();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   VIZ 3 · FIGURAS DE LISSAJOUS
+═══════════════════════════════════════════════════════ */
+let lissajousPhase = 0;
+
+function drawLissajous() {
+  const bass = getBass(), hi = getHi(), mid = getMid(), vol = getVol();
+  ctx.fillStyle = 'rgba(1,8,4,0.11)';
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  const a  = 2 + Math.floor(bass * 5);
+  const bN = 3 + Math.floor(hi * 5);
+  lissajousPhase += 0.0032 + mid * 0.009;
+
+  const R  = Math.min(canvasW, canvasH) * 0.37;
+  const cx = canvasW / 2, cy = canvasH / 2;
+
+  const layers = [
+    [0.82, 1.6, 1.0,  0],
+    [0.3,  0.75, 1.3, 0.07],
+    [0.1,  0.45, 0.7, -0.05],
+  ];
+
+  layers.forEach(([alpha, lw, rm, po], li) => {
+    ctx.beginPath();
+    for (let i = 0; i <= 1400; i++) {
+      const theta = (i / 1400) * Math.PI * 2;
+      ctx.lineTo(
+        cx + R * rm * Math.sin(a * theta + lissajousPhase + po),
+        cy + R * rm * Math.sin(bN * theta)
+      );
+    }
+    const col = `hsla(${148 + vol * 55 + li * 24},93%,${60 - li * 9}%,${alpha})`;
+    ctx.strokeStyle = col;
+    ctx.lineWidth   = lw + bass * 0.8;
+    if (li === 0) { ctx.shadowColor = col; ctx.shadowBlur = 16; }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   VIZ 4 · CURVAS POLARES
+═══════════════════════════════════════════════════════ */
+let polarTheta = 0;
+
+function igcd(a, b) { while (b) { const t = b; b = a % b; a = t; } return a; }
+
+function drawPolar() {
+  const bass = getBass(), mid = getMid(), vol = getVol();
+  ctx.fillStyle = 'rgba(7,4,1,0.11)';
+  ctx.fillRect(0, 0, canvasW, canvasH);
+  polarTheta += 0.004 + bass * 0.015;
+
+  const df    = getDomHz();
+  const n     = 2 + (Math.floor(df / 80) % 6) + 1;
+  const p     = 2 + (Math.floor(mid * 4) % 3) + 1;
+  const loops = n * p / igcd(n, p);
+  const R     = Math.min(canvasW, canvasH) * 0.40;
+  const cx    = canvasW / 2, cy = canvasH / 2;
+
+  const layers = [
+    [0.88, 1.7, 1.0, 1.0],
+    [0.32, 0.8, 1.28, 1.42],
+    [0.1,  0.42, 0.7, 0.58],
+  ];
+
+  layers.forEach(([alpha, lw, rm, rot], li) => {
+    ctx.beginPath();
+    for (let i = 0; i <= 2500; i++) {
+      const theta = (i / 2500) * Math.PI * 2 * loops + polarTheta * rot;
+      const r     = R * rm * Math.abs(Math.sin(n * theta / p)) * (0.48 + vol * 0.82);
+      ctx.lineTo(cx + r * Math.cos(theta), cy + r * Math.sin(theta));
+    }
+    const col = `hsla(${28 + bass * 75 + li * 28},97%,${64 - li * 10}%,${alpha})`;
+    ctx.strokeStyle = col;
+    ctx.lineWidth   = lw;
+    if (li === 0) { ctx.shadowColor = col; ctx.shadowBlur = 22; }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   VIZ 5 · CAMPO DE PARTÍCULAS
+═══════════════════════════════════════════════════════ */
+let particles    = [];
+let particleTime = 0;
+let trails       = [];  // Para las estelas
+let lastBass     = 0;
+let fieldAngle   = 0;   // Para rotación del campo
+const N_PARTICLES = 600;
+const TRAIL_LENGTH = 3;  // Cuántas posiciones guarda cada partícula
+
+const FIELD_FUNCS = {
+  ruido:      (x, y, t, s) => {
+    const k = 0.0028 * s;
+    return (
+      Math.sin(x * k + t) * Math.cos(y * k + t * 0.8) +
+      Math.sin(x * k * 1.7 - t * 0.65) * Math.cos(y * k * 1.4 + t * 0.4) * 0.5 +
+      Math.sin(x * k * 0.5 + y * k * 0.6 + t * 0.22) * 0.28
+    ) * Math.PI * 4;
+  },
+  vortice:    (x, y, t, s) => {
+    const dx = x - canvasW / 2, dy = y - canvasH / 2;
+    const r  = Math.sqrt(dx * dx + dy * dy) / s + 1e-4;
+    return Math.atan2(dy, dx) + Math.PI / 2 + Math.sin(t * 0.5 + r * 10) * 0.9 + t * 0.08;
+  },
+  dipolo:     (x, y, t) => {
+    const p1x = canvasW * 0.34, p1y = canvasH * 0.5;
+    const p2x = canvasW * 0.66, p2y = canvasH * 0.5;
+    const d1x = x - p1x, d1y = y - p1y, r1 = d1x * d1x + d1y * d1y + 1;
+    const d2x = x - p2x, d2y = y - p2y, r2 = d2x * d2x + d2y * d2y + 1;
+    return Math.atan2(d1y / r1 - d2y / r2, d1x / r1 - d2x / r2) + Math.sin(t * 0.3) * 0.5;
+  },
+  silla:      (x, y, t) => {
+    const cx = x - canvasW / 2, cy = y - canvasH / 2;
+    return Math.atan2(-cy, cx) + Math.sin(t * 0.4) * 0.6;
+  },
+  espiral:    (x, y, t) => {
+    const dx = x - canvasW / 2, dy = y - canvasH / 2;
+    const r  = Math.sqrt(dx * dx + dy * dy) + 1;
+    return Math.atan2(dy, dx) + Math.PI / 4 + r * 0.0018 + Math.sin(t * 0.35) * 0.3;
+  },
+  atractores: (x, y, t) => {
+    const attractors = [
+      [canvasW * 0.25, canvasH * 0.28,  1],
+      [canvasW * 0.75, canvasH * 0.28, -1],
+      [canvasW * 0.5,  canvasH * 0.74,  1],
+      [canvasW * 0.5,  canvasH * 0.5,  -1],
+    ];
+    let vx = 0, vy = 0;
+    for (const [ax, ay, sg] of attractors) {
+      const dx = ax - x, dy = ay - y, r2 = dx * dx + dy * dy + 80;
+      vx += sg * dx / r2; vy += sg * dy / r2;
+    }
+    return Math.atan2(vy, vx) + Math.sin(t * 0.28) * 0.65;
+  },
+  cuadrupolo: (x, y, t) => {
+    const poles = [
+      [canvasW * 0.34, canvasH * 0.34,  1],
+      [canvasW * 0.66, canvasH * 0.34, -1],
+      [canvasW * 0.66, canvasH * 0.66,  1],
+      [canvasW * 0.34, canvasH * 0.66, -1],
+    ];
+    let vx = 0, vy = 0;
+    for (const [ax, ay, sg] of poles) {
+      const dx = x - ax, dy = y - ay, r2 = dx * dx + dy * dy + 180;
+      vx += sg * dx / r2; vy += sg * dy / r2;
+    }
+    return Math.atan2(vy, vx) + t * 0.22;
+  },
+};
+
+function initParticles() {
+  particles = [];
+  for (let i = 0; i < N_PARTICLES; i++) {
+    particles.push({
+      x:       Math.random() * canvasW,
+      y:       Math.random() * canvasH,
+      vx:      0,
+      vy:      0,
+      life:    Math.random(),
+      maxLife: 0.5 + Math.random() * 0.7,
+      hue:     Math.random() * 360,
+      sz:      0.8 + Math.random() * 1.8,
+      spd:     0.6 + Math.random() * 1.8,
+      trail:   []  // Nuevo: array para la estela
+    });
+  }
+}
+
+function drawParticles() {
+  const bass = getBass(), mid = getMid(), hi = getHi(), vol = getVol();
+  
+  // Fondo sutil (sin flashes, solo fade normal)
+  ctx.fillStyle = `rgba(2, 4, 11, 0.12)`;
+  ctx.fillRect(0, 0, canvasW, canvasH);
+  
+  if (!particles.length) initParticles();
+  
+  particleTime += 0.008 + mid * 0.02;
+  fieldAngle += 0.005 + bass * 0.015;  // Campo rotativo con la música
+  
+  const fieldFn = FIELD_FUNCS[currentField] || FIELD_FUNCS.ruido;
+  const spd = 1.2 + vol * 4.5;
+  const sc = Math.min(canvasW, canvasH);
+  
+  // Detectar golpe de graves (para explosiones)
+  const bassHit = bass > 0.35 && bass > lastBass * 1.2;
+  lastBass = bass;
+  
+  // ========== 1. ACTUALIZAR Y DIBUJAR PARTÍCULAS ==========
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+    
+    // Campo vectorial con rotación musical
+    let ang = fieldFn(p.x, p.y, particleTime, sc);
+    if (currentField === 'vortice') {
+      ang += fieldAngle * 0.5;  // El vórtice rota con la música
+    }
+    
+    // Velocidad influenciada por graves y agudos
+    const bassInfluence = bass * 1.8;
+    const hiInfluence = hi * 1.2;
+    
+    p.vx = p.vx * 0.86 + (Math.cos(ang) + Math.sin(p.y * 0.003) * bassInfluence) * p.spd * spd * 0.11;
+    p.vy = p.vy * 0.86 + (Math.sin(ang) + Math.cos(p.x * 0.003) * hiInfluence) * p.spd * spd * 0.11;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= 0.0018 + vol * 0.0012;
+    
+    // Color dinámico (cambia con frecuencia)
+    p.hue = (p.hue + 0.6 + mid * 1.5 + bass * 2) % 360;
+    
+    // Tamaño dinámico según volumen y frecuencia
+    const dynamicSize = p.sz * (0.7 + vol * 1.2 + bass * 1.5);
+    
+    // ========== 2. GUARDAR ESTELA (trail) ==========
+    if (!p.trail) p.trail = [];
+    p.trail.unshift({ x: p.x, y: p.y });
+    if (p.trail.length > TRAIL_LENGTH) p.trail.pop();
+    
+    // ========== 3. DIBUJAR ESTELA ==========
+    for (let t = 0; t < p.trail.length; t++) {
+      const trailPos = p.trail[t];
+      const trailAlpha = 1 - (t / TRAIL_LENGTH);
+      ctx.beginPath();
+      ctx.arc(trailPos.x, trailPos.y, dynamicSize * (0.3 + trailAlpha * 0.5), 0, Math.PI * 2);
+      ctx.fillStyle = `hsla(${p.hue}, 85%, 60%, ${trailAlpha * 0.15})`;
+      ctx.fill();
+    }
+    
+    // ========== 4. RESPAWN SIMPLE (sin explosiones) ==========
+    if (p.x < -30 || p.x > canvasW + 30 || p.y < -30 || p.y > canvasH + 30 || p.life <= 0) {
+      p.x = Math.random() * canvasW;
+      p.y = Math.random() * canvasH;
+      p.vx = 0;
+      p.vy = 0;
+      p.life = p.maxLife;
+      p.trail = [];
+    }
+    
+    // ========== 5. DIBUJAR PARTÍCULA PRINCIPAL ==========
+    const lifeRatio = p.life / p.maxLife;
+    const brightness = 55 + vol * 30 + bass * 20;
+    const glowSize = dynamicSize * (1 + Math.sin(particleTime * 10 + p.hue) * 0.2);
+    
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, glowSize, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue}, 88%, ${brightness}%, ${lifeRatio * (0.5 + vol * 0.5)})`;
+    ctx.fill();
+    
+    // Núcleo más brillante
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, glowSize * 0.5, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue}, 95%, 75%, ${lifeRatio * 0.8})`;
+    ctx.fill();
+  }
+  
+  // ========== 6. CONEXIONES ENTRE PARTÍCULAS CERCANAS ==========
+  if (vol > 0.05) {
+    ctx.beginPath();
+    const connectionDist = 45 + (1 - vol) * 30;
+    
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j += 15) {  // Muestreo para rendimiento
+        const p1 = particles[i];
+        const p2 = particles[j];
+        const dx = p1.x - p2.x;
+        const dy = p1.y - p2.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        
+        if (dist < connectionDist) {
+          const intensity = 1 - (dist / connectionDist);
+          const alpha = intensity * 0.08 * vol;
+          const hue = (p1.hue + p2.hue) / 2;
+          
+          ctx.beginPath();
+          ctx.moveTo(p1.x, p1.y);
+          ctx.lineTo(p2.x, p2.y);
+          ctx.strokeStyle = `hsla(${hue}, 80%, 65%, ${alpha})`;
+          ctx.lineWidth = 0.5 + intensity * 1.2;
+          ctx.stroke();
+        }
+      }
+    }
+  }
+  
+  // ========== 7. EFECTO DE RESONANCIA (anillos sutiles, sin flash) ==========
+  if (vol > 0.1) {
+    const cx = canvasW / 2;
+    const cy = canvasH / 2;
+    const ringCount = 2 + Math.floor(bass * 8);
+    
+    for (let r = 0; r < ringCount; r++) {
+      const ringSize = 30 + r * 25 + (particleTime * 80) % 150;
+      if (ringSize < Math.min(canvasW, canvasH) * 0.8) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, ringSize, 0, Math.PI * 2);
+        ctx.strokeStyle = `hsla(${200 + bass * 80}, 85%, 60%, ${0.03 + bass * 0.1})`;
+        ctx.lineWidth = 0.6;
+        ctx.stroke();
+      }
+    }
+  }
+  
+  // ========== 8. ETIQUETA DE CAMPO ACTIVO ==========
+  ctx.font = '9px "JetBrains Mono", monospace';
+  ctx.fillStyle = `rgba(180, 200, 240, 0.25)`;
+  ctx.fillText(`campo: ${currentField.toUpperCase()} · ${particles.length} partículas`, 18, canvasH - 18);
+}
+
+/* ═══════════════════════════════════════════════════════
+   VIZ 6 · FIGURAS DE CHLADNI
+   Optimizado: usa Worker vía OffscreenCanvas si disponible,
+   o fallback mejorado con resolución adaptativa
+═══════════════════════════════════════════════════════ */
+let chladniM    = 3;
+let chladniN    = 4;
+let chladniLast = 0;
+// Para Chladni mejorado
+let chladniTime = 0;
+let chladniPulse = 0;
+let chladniModeHistory = [];
+
+const chladniOff = document.createElement('canvas');
+const chladniCtx = chladniOff.getContext('2d');
+
+function drawChladni() {
+  const bass = getBass(), mid = getMid(), hi = getHi(), vol = getVol();
+  
+  // Fondo dinámico que palpita con la música
+  ctx.fillStyle = `rgba(2, 2, 12, ${0.15 + bass * 0.12})`;
+  ctx.fillRect(0, 0, canvasW, canvasH);
+  
+  chladniTime += 0.02 + bass * 0.04;
+  chladniPulse = chladniPulse * 0.85 + vol * 0.15;
+  
+  // ========== MÁS DINÁMICA DE MODOS (cambian más rápido) ==========
+  const nm = 2 + Math.floor(bass * 12 + mid * 6);
+  const nn = 2 + Math.floor(mid * 10 + hi * 4);
+  
+  // Suavizado para evitar cambios bruscos
+  chladniModeHistory.push([nm, nn]);
+  if (chladniModeHistory.length > 8) chladniModeHistory.shift();
+  let smoothM = 0, smoothN = 0;
+  for (let h of chladniModeHistory) {
+    smoothM += h[0];
+    smoothN += h[1];
+  }
+  const targetM = Math.round(smoothM / chladniModeHistory.length);
+  const targetN = Math.round(smoothN / chladniModeHistory.length);
+  
+  if ((targetM !== chladniM || targetN !== chladniN) && Date.now() - chladniLast > 120) {
+    chladniM = targetM;
+    chladniN = targetN;
+    chladniDirty = true;
+    chladniLast = Date.now();
+  }
+  
+  // ========== REGENERAR PATRÓN CON CALIDAD DINÁMICA ==========
+  if (chladniDirty) {
+    buildChladniImproved(chladniM, chladniN, vol);
+    chladniDirty = false;
+  }
+  
+  // ========== DIBUJAR CON EFECTOS DE LUZ ==========
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  
+  // Capa principal con brillo variable
+  ctx.globalAlpha = 0.45 + chladniPulse * 0.55;
+  ctx.drawImage(chladniOff, 0, 0);
+  
+  // ========== ONDAS DE CHOQUE (con cada golpe de graves) ==========
+  if (bass > 0.15 && chladniPulse > 0.1) {
+    const shockIntensity = bass * 0.5;
+    ctx.globalCompositeOperation = 'screen';
+    ctx.fillStyle = `rgba(80, 160, 255, ${shockIntensity * 0.3})`;
+    ctx.fillRect(0, 0, canvasW, canvasH);
+  }
+  
+  ctx.restore();
+  ctx.globalCompositeOperation = 'source-over';
+  
+  // ========== SUPERPOSICIÓN DE COLOR POR FRECUENCIA ==========
+  const colorLayer = ctx.createLinearGradient(0, 0, canvasW, canvasH);
+  colorLayer.addColorStop(0, `hsla(${200 + bass * 100}, 85%, 55%, ${vol * 0.2})`);
+  colorLayer.addColorStop(0.5, `hsla(${280 + mid * 80}, 80%, 50%, ${vol * 0.15})`);
+  colorLayer.addColorStop(1, `hsla(${340 + hi * 60}, 90%, 60%, ${vol * 0.2})`);
+  ctx.fillStyle = colorLayer;
+  ctx.fillRect(0, 0, canvasW, canvasH);
+  
+  // ========== PARTÍCULAS SOBRE LAS LÍNEAS NODALES ==========
+  if (!chladniParticles) initChladniParticles();
+  updateChladniParticles(bass, mid, vol);
+  
+  // ========== EFECTO DE RESONANCIA (anillos concéntricos) ==========
+  const cx = canvasW / 2, cy = canvasH / 2;
+  const maxR = Math.min(canvasW, canvasH) * 0.45;
+  for (let i = 0; i < 4; i++) {
+    const ringSize = maxR * (0.2 + i * 0.2) + chladniPulse * 30;
+    const ringAlpha = 0.05 + vol * 0.08 - i * 0.01;
+    ctx.beginPath();
+    ctx.arc(cx, cy, ringSize, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(100, 180, 255, ${ringAlpha})`;
+    ctx.lineWidth = 0.8 + chladniPulse * 4;
+    ctx.stroke();
+  }
+  
+  // ========== ETIQUETA DE MODOS MEJORADA ==========
+  ctx.font = 'bold 11px "JetBrains Mono", monospace';
+  ctx.fillStyle = `rgba(180, 210, 255, ${0.3 + vol * 0.4})`;
+  ctx.shadowBlur = 6;
+  ctx.shadowColor = `rgba(80, 150, 255, ${vol * 0.6})`;
+  ctx.fillText(`Chladni · m = ${chladniM}  n = ${chladniN} · resonancia`, 18, canvasH - 22);
+  ctx.font = '9px "JetBrains Mono", monospace';
+  ctx.fillStyle = `rgba(140, 170, 220, ${0.2 + vol * 0.3})`;
+  ctx.fillText(`modo ${(chladniM + chladniN) % 12 + 1} de 12`, 18, canvasH - 10);
+  ctx.shadowBlur = 0;
+}
+
+// Versión mejorada de buildChladni con resolución dinámica
+function buildChladniImproved(m, n, vol) {
+  chladniOff.width = canvasW;
+  chladniOff.height = canvasH;
+  
+  const sz = Math.min(canvasW, canvasH) * 0.85;
+  const ox = (canvasW - sz) / 2;
+  const oy = (canvasH - sz) / 2;
+  
+  // Resolución dinámica: mejor calidad cuando hay volumen
+  const res = vol > 0.1 ? 2 : (canvasW > 1200 ? 2 : 3);
+  const thr = 0.06 + (1 - vol) * 0.04;  // Más sensible al audio
+  
+  const img = chladniCtx.createImageData(canvasW, canvasH);
+  const d = img.data;
+  
+  for (let py = 0; py < canvasH; py += res) {
+    for (let px = 0; px < canvasW; px += res) {
+      const nx = (px - ox) / sz;
+      const ny = (py - oy) / sz;
+      if (nx < 0 || nx > 1 || ny < 0 || ny > 1) continue;
+      
+      // Fórmula de Chladni con más armónicos
+      const z1 = Math.cos(m * nx * Math.PI) * Math.cos(n * ny * Math.PI);
+      const z2 = Math.cos(n * nx * Math.PI) * Math.cos(m * ny * Math.PI);
+      const z = z1 - z2;
+      
+      if (Math.abs(z) < thr) {
+        // Color basado en la frecuencia del modo
+        const hue = (m * 30 + n * 20) % 360;
+        const intensity = 1 - Math.abs(z) / thr;
+        const rVal = Math.floor(100 + intensity * 155);
+        const gVal = Math.floor(80 + intensity * 120);
+        const bVal = Math.floor(180 + intensity * 75);
+        
+        for (let dy = 0; dy < res; dy++) {
+          for (let dx = 0; dx < res; dx++) {
+            const idx = ((py + dy) * canvasW + (px + dx)) * 4;
+            d[idx] = rVal;
+            d[idx + 1] = gVal;
+            d[idx + 2] = bVal;
+            d[idx + 3] = Math.min(255, intensity * 200 + 55);
+          }
+        }
+      }
+    }
+  }
+  chladniCtx.putImageData(img, 0, 0);
+}
+
+// Partículas que bailan sobre las líneas nodales
+let chladniParticles = [];
+
+function initChladniParticles() {
+  chladniParticles = [];
+  for (let i = 0; i < 400; i++) {
+    chladniParticles.push({
+      x: Math.random() * canvasW,
+      y: Math.random() * canvasH,
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      life: Math.random(),
+      maxLife: 0.5 + Math.random() * 0.8,
+      hue: Math.random() * 360,
+    });
+  }
+}
+
+function updateChladniParticles(bass, mid, vol) {
+  if (!chladniParticles.length) initChladniParticles();
+  
+  for (let i = 0; i < chladniParticles.length; i++) {
+    const p = chladniParticles[i];
+    
+    // Movimiento influenciado por el audio
+    p.vx += (Math.sin(p.y * 0.01 + Date.now() * 0.003) * 0.05 + bass * 0.2) * (0.5 + vol);
+    p.vy += (Math.cos(p.x * 0.01 + Date.now() * 0.004) * 0.05 + mid * 0.2) * (0.5 + vol);
+    p.vx *= 0.96;
+    p.vy *= 0.96;
+    p.x += p.vx;
+    p.y += p.vy;
+    p.life -= 0.003 + vol * 0.002;
+    p.hue = (p.hue + 0.5 + vol * 2) % 360;
+    
+    // Respawn
+    if (p.x < 0 || p.x > canvasW || p.y < 0 || p.y > canvasH || p.life <= 0) {
+      p.x = Math.random() * canvasW;
+      p.y = Math.random() * canvasH;
+      p.vx = (Math.random() - 0.5) * 0.8;
+      p.vy = (Math.random() - 0.5) * 0.8;
+      p.life = p.maxLife;
+    }
+    
+    // Dibujar partícula
+    const sz = 1.2 + bass * 2.5 + mid * 1.5;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, sz, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue}, 85%, 65%, ${(p.life / p.maxLife) * (0.3 + vol * 0.7)})`;
+    ctx.fill();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   VIZ 7 · GEOMETRÍA HIPERBÓLICA (Disco de Poincaré)
+═══════════════════════════════════════════════════════ */
+let hypPtcls = [];
+let hypTime  = 0;
+let hypGeo   = null;
+
+function buildHypGeo() {
+  hypGeo = [];
+  for (let i = 0; i < 6; i++) hypGeo.push({ line: true, a: (i / 6) * Math.PI });
+  const circles = [
+    [1.6, 0], [0, 1.6], [-1.6, 0], [0, -1.6],
+    [1.2, 1.2], [-1.2, 1.2], [-1.2, -1.2], [1.2, -1.2],
+    [2.2, 0.6], [0.6, 2.2], [-2.2, 0.6], [0.6, -2.2],
+  ];
+  for (const [cx, cy] of circles) {
+    hypGeo.push({ line: false, cx, cy, r: Math.sqrt(cx * cx + cy * cy - 1) });
+  }
+}
+
+function initHypPtcls() {
+  hypPtcls = [];
+  for (let i = 0; i < 640; i++) {
+    const r = Math.sqrt(Math.random()) * 0.9;
+    const a = Math.random() * Math.PI * 2;
+    hypPtcls.push({
+      x: r * Math.cos(a), y: r * Math.sin(a),
+      vx: 0, vy: 0,
+      hue: Math.random() * 360,
+      life: Math.random(),
+      maxLife: 0.5 + Math.random() * 0.5,
+    });
+  }
+}
+
+function drawHyperbolic() {
+  const bass = getBass(), mid = getMid(), hi = getHi(), vol = getVol();
+  
+  // Fondo más reactivo
+  ctx.fillStyle = `rgba(2,4,16,${0.08 + bass * 0.12})`;
+  ctx.fillRect(0, 0, canvasW, canvasH);
+  
+  hypTime += 0.008 + mid * 0.025 + bass * 0.015;
+  
+  const R = Math.min(canvasW, canvasH) * 0.46;
+  const cx = canvasW / 2, cy = canvasH / 2;
+  
+  // ========== ANILLOS PULSANTES (reaccionan al volumen) ==========
+  for (let i = 1; i <= 5; i++) {
+    const pulse = vol * 0.3 * Math.sin(hypTime * 8 + i);
+    ctx.beginPath();
+    ctx.arc(cx, cy, R * (0.2 + i * 0.12 + pulse), 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(88, 158, 238, ${0.04 + vol * 0.08 - i * 0.008})`;
+    ctx.lineWidth = 0.8 + vol * 1.5;
+    ctx.stroke();
+  }
+  
+  // ========== TESELADO HIPERBÓLICO DINÁMICO ==========
+  if (!hypGeo) buildHypGeo();
+  
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, Math.PI * 2);
+  ctx.clip();
+  
+  // Líneas geodésicas que laten con el audio
+  for (let g of hypGeo) {
+    ctx.beginPath();
+    if (g.line) {
+      const angle = g.a + hypTime * 0.15 * bass;
+      ctx.moveTo(cx + Math.cos(angle) * R, cy + Math.sin(angle) * R);
+      ctx.lineTo(cx - Math.cos(angle) * R, cy - Math.sin(angle) * R);
+    } else {
+      const expand = 1 + vol * 0.15 * Math.sin(hypTime * 3);
+      ctx.arc(cx + g.cx * R * expand, cy + g.cy * R * expand, g.r * R * (0.8 + vol * 0.3), 0, Math.PI * 2);
+    }
+    ctx.strokeStyle = `rgba(100, 140, 220, ${0.06 + bass * 0.05 + mid * 0.03})`;
+    ctx.lineWidth = 0.4 + mid * 1.2;
+    ctx.stroke();
+  }
+  
+  // ========== PARTÍCULAS REACTIVAS (más dinámicas) ==========
+  if (!hypPtcls.length) initHypPtcls();
+  
+  const speed = 0.012 + vol * 0.045;
+  const bassInfluence = bass * 2.5;
+  
+  for (let i = 0; i < hypPtcls.length; i++) {
+    const p = hypPtcls[i];
+    const r2 = p.x * p.x + p.y * p.y;
+    const hs = Math.max(0, 1 - r2);
+    
+    // Ángulo influenciado por frecuencia dominante y graves
+    const domHz = getDomHz();
+    const freqAngle = (domHz / 1000) * Math.PI * 2;
+    const ang = Math.atan2(p.y, p.x) + Math.PI / 2 + hypTime * 0.25 + bassInfluence + freqAngle * 0.5;
+    const rm = Math.sqrt(r2) + 1e-5;
+    
+    // Velocidad mucho más reactiva
+    p.vx = p.vx * 0.85 + (Math.cos(ang) - p.x / rm * bassInfluence * 0.15) * speed * hs * 0.15;
+    p.vy = p.vy * 0.85 + (Math.sin(ang) - p.y / rm * bassInfluence * 0.15) * speed * hs * 0.15;
+    p.x += p.vx;
+    p.y += p.vy;
+    
+    // Color dinámico: cambia con frecuencia y volumen
+    p.hue = (p.hue + 0.8 + vol * 3 + mid * 2) % 360;
+    p.life -= 0.002 + vol * 0.003;
+    
+    // Respawn más dramático
+    if (Math.sqrt(r2) > 0.96 || p.life <= 0) {
+      const r0 = Math.sqrt(Math.random()) * 0.6;
+      const a = Math.random() * Math.PI * 2;
+      p.x = r0 * Math.cos(a);
+      p.y = r0 * Math.sin(a);
+      p.vx = (Math.random() - 0.5) * 0.02;
+      p.vy = (Math.random() - 0.5) * 0.02;
+      p.life = p.maxLife;
+    }
+    
+    // Tamaño y opacidad según volumen
+    const sz = Math.max(0.4, (0.8 + (1 - Math.sqrt(r2)) * 1.5) * (0.6 + vol * 1.8));
+    const lifeRatio = p.life / p.maxLife;
+    const brightness = 55 + vol * 35 + bass * 20;
+    
+    ctx.beginPath();
+    ctx.arc(cx + p.x * R, cy + p.y * R, sz, 0, Math.PI * 2);
+    ctx.fillStyle = `hsla(${p.hue}, 85%, ${brightness}%, ${lifeRatio * (0.25 + vol * 0.65) * hs})`;
+    ctx.fill();
+  }
+  ctx.restore();
+  
+  // ========== EFECTO DE BRILLO CENTRAL (late con el ritmo) ==========
+  const glowIntensity = 0.00 + vol * 0.125;
+  ctx.beginPath();
+  ctx.arc(cx, cy, R * 0.12 * (1 + vol * 0.5), 0, Math.PI * 2);
+  ctx.fillStyle = `rgba(180, 210, 255, ${glowIntensity})`;
+  ctx.fill();
+  
+  // ========== ETIQUETA DE FRECUENCIA DOMINANTE ==========
+  if (vol > 0.05) {
+    const domHz = getDomHz();
+    const domNote = Math.round(12 * Math.log2(domHz / 440) + 69);
+    const noteName = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'][domNote % 12];
+    ctx.font = 'bold 11px "JetBrains Mono", monospace';
+    ctx.fillStyle = `rgba(200, 220, 255, ${0.3 + vol * 0.5})`;
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = `rgba(100, 150, 255, ${vol * 0.8})`;
+    ctx.fillText(`${noteName} ${Math.floor(domHz)}Hz`, 18, canvasH - 18);
+    ctx.shadowBlur = 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   VIZ 8 · ESPIRAL DE FIBONACCI / NAUTILUS
+═══════════════════════════════════════════════════════ */
+const PHI        = (1 + Math.sqrt(5)) / 2;
+const GOLDEN_ANG = Math.PI * 2 / (PHI * PHI);
+let fibTime      = 0;
+
+function drawFibonacci() {
+  const bass = getBass(), mid = getMid(), vol = getVol();
+  ctx.fillStyle = 'rgba(3,6,2,0.13)';
+  ctx.fillRect(0, 0, canvasW, canvasH);
+  fibTime += 0.003 + bass * 0.01;
+
+  const cx    = canvasW / 2, cy = canvasH / 2;
+  const R     = Math.min(canvasW, canvasH) * 0.43;
+  const TURNS = 5.5;
+  const tMax  = TURNS * Math.PI * 2;
+  const bc    = Math.log(R) / tMax;
+  const N_B   = 72;   // más cortes → vibración más rica
+
+  // Brazos espirales
+  for (let arm = 0; arm < 3; arm++) {
+    const off = arm * (Math.PI * 2 / PHI);
+    ctx.beginPath();
+    for (let i = 0; i <= 600; i++) {
+      const theta = (i / 600) * tMax + off + fibTime;
+      ctx.lineTo(cx + Math.exp(bc * theta) * Math.cos(theta), cy + Math.exp(bc * theta) * Math.sin(theta));
+    }
+    ctx.strokeStyle = `rgba(155,205,125,${0.018 + vol * 0.02})`;
+    ctx.lineWidth   = 0.5;
+    ctx.stroke();
+  }
+
+  // Bandas de frecuencia — más cortes, vibración más suave
+  for (let i = 0; i < N_B; i++) {
+    const t0  = (i / N_B) * tMax;
+    const t1  = ((i + 1) / N_B) * tMax;
+    const binIdx = Math.floor(i * freqBinCount / (N_B * 1.8));
+    const amp = freqData ? freqData[binIdx] / 255 : 0;
+    const amp2 = freqData ? freqData[Math.min(binIdx + 2, freqBinCount - 1)] / 255 : 0;
+    const smoothAmp = amp * 0.7 + amp2 * 0.3;
+
+    ctx.beginPath();
+    const steps = 40;
+    for (let s = 0; s <= steps; s++) {
+      const frac  = s / steps;
+      const theta = t0 + frac * (t1 - t0) + fibTime;
+      // vibración suave con múltiples armónicos
+      const vibr  = 1 + smoothAmp * 0.28 * Math.sin(fibTime * 4 + i * 0.45)
+                      + smoothAmp * 0.10 * Math.sin(fibTime * 7 + i * 0.9);
+      const r     = Math.exp(bc * theta) * vibr;
+      ctx.lineTo(cx + r * Math.cos(theta), cy + r * Math.sin(theta));
+    }
+    const col = `hsla(${88 + (i / N_B) * 195 + bass * 40},88%,${38 + smoothAmp * 44}%,${0.28 + smoothAmp * 0.72})`;
+    ctx.strokeStyle = col;
+    ctx.lineWidth   = 1.2 + smoothAmp * 3.5;
+    if (smoothAmp > 0.40) { ctx.shadowColor = col; ctx.shadowBlur = 8 + smoothAmp * 18; }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+
+  // Semillas de Fibonacci
+  for (let i = 0; i < 233; i++) {
+    const theta = i * GOLDEN_ANG + fibTime * 0.28;
+    const r     = R * 0.9 * Math.sqrt(i / 233);
+    const amp   = freqData ? freqData[Math.floor(i * freqBinCount / 466)] / 255 : 0;
+    ctx.beginPath();
+    ctx.arc(
+      cx + r * Math.cos(theta),
+      cy + r * Math.sin(theta),
+      (0.6 + amp * 2.8) * (1 + vol * 0.9), 0, Math.PI * 2
+    );
+    ctx.fillStyle = `hsla(${55 + amp * 85},92%,70%,${0.1 + amp * 0.9})`;
+    ctx.fill();
+  }
+
+  ctx.font      = '10px "JetBrains Mono",monospace';
+  ctx.fillStyle = 'rgba(185,225,155,0.18)';
+  ctx.fillText('φ = 1.61803…', 18, canvasH - 18);
+}
+
+/* ═══════════════════════════════════════════════════════
+   VIZ 9 · CÍRCULO DE QUINTAS
+═══════════════════════════════════════════════════════ */
+const NOTES = ['C', 'G', 'D', 'A', 'E', 'B', 'F♯', 'D♭', 'A♭', 'E♭', 'B♭', 'F'];
+const COF   = Array.from({ length: 12 }, (_, i) => (i * 7) % 12);
+
+let fifthsTime = 0;
+let cofSmooth  = new Float32Array(12);
+
+function drawFifths() {
+  const bass = getBass(), vol = getVol();
+  ctx.fillStyle = 'rgba(3,2,12,0.11)';
+  ctx.fillRect(0, 0, canvasW, canvasH);
+  fifthsTime += 0.006 + bass * 0.015;
+
+  const ne = noteEnergies();
+  for (let i = 0; i < 12; i++) cofSmooth[i] = cofSmooth[i] * 0.87 + ne[COF[i]] * 0.13;
+
+  const cx = canvasW / 2, cy = canvasH / 2;
+  const R  = Math.min(canvasW, canvasH) * 0.34;
+
+  [1.28, 1.38].forEach(rm => {
+    ctx.beginPath();
+    ctx.arc(cx, cy, R * rm, 0, Math.PI * 2);
+    ctx.strokeStyle = `rgba(125,160,255,${0.03 + vol * 0.04})`;
+    ctx.lineWidth   = 0.6;
+    ctx.stroke();
+  });
+
+  for (let pos = 0; pos < 12; pos++) {
+    const a0  = (pos / 12) * Math.PI * 2 - Math.PI / 2 - Math.PI / 12;
+    const a1  = a0 + Math.PI * 2 / 12;
+    const am  = (a0 + a1) / 2;
+    const e   = cofSmooth[pos];
+    const h   = pos * 30 + fifthsTime * 6;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, R * (0.54 + e * 0.43), a0, a1);
+    ctx.closePath();
+    ctx.fillStyle = `hsla(${h},72%,${28 + e * 38}%,${0.07 + e * 0.42})`;
+    ctx.fill();
+
+    const col = `hsla(${h},88%,${48 + e * 32}%,${0.18 + e * 0.78})`;
+    ctx.beginPath();
+    ctx.arc(cx, cy, R, a0 + 0.055, a1 - 0.055);
+    ctx.strokeStyle = col;
+    ctx.lineWidth   = 2.2 + e * 5.5;
+    if (e > 0.32) { ctx.shadowColor = col; ctx.shadowBlur = 14 + e * 18; }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    ctx.textAlign    = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font         = `${e > 0.28 ? 'bold ' : ''}${Math.floor(10 + e * 8)}px "Syne",sans-serif`;
+    ctx.fillStyle    = `rgba(255,255,255,${0.22 + e * 0.78})`;
+    if (e > 0.28) { ctx.shadowColor = `hsl(${h},100%,70%)`; ctx.shadowBlur = 8 + e * 12; }
+    ctx.fillText(NOTES[pos], cx + Math.cos(am) * R * 1.13, cy + Math.sin(am) * R * 1.13);
+    ctx.shadowBlur = 0;
+  }
+
+  ctx.textAlign    = 'start';
+  ctx.textBaseline = 'alphabetic';
+
+  // Líneas de intervalo entre notas activas
+  const active = [];
+  for (let i = 0; i < 12; i++) if (cofSmooth[i] > 0.28) active.push(i);
+
+  for (let i = 0; i < active.length; i++) {
+    for (let j = i + 1; j < active.length; j++) {
+      const a    = active[i], b = active[j];
+      const aa   = (a / 12) * Math.PI * 2 - Math.PI / 2;
+      const ab   = (b / 12) * Math.PI * 2 - Math.PI / 2;
+      const minE = Math.min(cofSmooth[a], cofSmooth[b]);
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(aa) * R * 0.82, cy + Math.sin(aa) * R * 0.82);
+      ctx.lineTo(cx + Math.cos(ab) * R * 0.82, cy + Math.sin(ab) * R * 0.82);
+      ctx.strokeStyle = `hsla(${(a + b) * 15 + fifthsTime * 20},80%,66%,${minE * 0.55})`;
+      ctx.lineWidth   = minE * 2.2;
+      ctx.stroke();
+    }
+  }
+
+  const gr = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.46 * (1 + vol * 0.1));
+  gr.addColorStop(0, `hsla(${fifthsTime * 30 % 360},68%,38%,${0.1 + vol * 0.22})`);
+  gr.addColorStop(1, 'transparent');
+  ctx.beginPath();
+  ctx.arc(cx, cy, R * 0.46 * (1 + vol * 0.1), 0, Math.PI * 2);
+  ctx.fillStyle = gr;
+  ctx.fill();
+}
+
+/* ═══════════════════════════════════════════════════════
+   VIZ 10 · ESPECTRO DE FOURIER
+═══════════════════════════════════════════════════════ */
+let specTime       = 0;
+let specSmooth     = null;
+let specPeaks      = null;
+let specPeakHold   = null;
+let specPeakDecay  = null;
+
+function initSpectrum() {
+  if (!freqBinCount) return;
+  const N = 128;
+  specSmooth    = new Float32Array(N);
+  specPeaks     = new Float32Array(N);
+  specPeakHold  = new Float32Array(N);
+  specPeakDecay = new Float32Array(N);
+}
+
+function drawSpectrum() {
+  const bass = getBass(), vol = getVol();
+  specTime += 0.012 + bass * 0.02;
+
+  // Fondo con fade suave
+  ctx.fillStyle = 'rgba(1,1,14,0.22)';
+  ctx.fillRect(0, 0, canvasW, canvasH);
+
+  if (!specSmooth && freqBinCount) initSpectrum();
+  if (!specSmooth) return;
+
+  const N   = specSmooth.length;
+  const W   = canvasW;
+  const H   = canvasH;
+  const cx  = W / 2;
+
+  // ── WAVEFORM TEMPORAL (forma de onda superior) ──────────────────────────
+  if (timeData) {
+    ctx.beginPath();
+    const wH = H * 0.12;
+    const wY = H * 0.15;
+    for (let i = 0; i < timeData.length; i++) {
+      const x = (i / timeData.length) * W;
+      const y = wY + ((timeData[i] / 128) - 1) * wH;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    const waveGrad = ctx.createLinearGradient(0, 0, W, 0);
+    waveGrad.addColorStop(0,   'rgba(40,110,220,0.0)');
+    waveGrad.addColorStop(0.2, `rgba(80,160,255,${0.18 + vol * 0.38})`);
+    waveGrad.addColorStop(0.5, `rgba(150,210,255,${0.28 + vol * 0.52})`);
+    waveGrad.addColorStop(0.8, `rgba(80,160,255,${0.18 + vol * 0.38})`);
+    waveGrad.addColorStop(1,   'rgba(40,110,220,0.0)');
+    ctx.strokeStyle = waveGrad;
+    ctx.lineWidth   = 1.2 + vol * 1.8;
+    ctx.shadowColor = `rgba(100,180,255,${vol * 0.6})`;
+    ctx.shadowBlur  = vol > 0.05 ? 10 : 0;
+    ctx.stroke();
+    ctx.shadowBlur  = 0;
+  }
+
+  // ── BARRAS ESPECTRALES PRINCIPALES ──────────────────────────────────────
+  // Log scale para mejor distribución de frecuencias
+  const barH      = H * 0.52;
+  const barY      = H * 0.86;           // base de las barras
+  const barGap    = 2;
+  const totalW    = W * 0.88;
+  const startX    = (W - totalW) / 2;
+  const barW      = (totalW / N) - barGap;
+
+  for (let i = 0; i < N; i++) {
+    // Mapeo logarítmico al buffer de frecuencia
+    const logIdx  = Math.pow(i / N, 1.6) * (freqBinCount * 0.82);
+    const binA    = Math.floor(logIdx);
+    const binB    = Math.min(binA + 1, freqBinCount - 1);
+    const frac    = logIdx - binA;
+    const raw     = freqData
+      ? ((freqData[binA] * (1 - frac) + freqData[binB] * frac) / 255)
+      : 0;
+
+    // Suavizado temporal
+    specSmooth[i] = specSmooth[i] * 0.78 + raw * 0.22;
+    const amp     = specSmooth[i];
+
+    // Peak hold
+    if (!specPeakHold) continue;
+    specPeakHold[i]--;
+    if (amp >= specPeaks[i]) {
+      specPeaks[i]     = amp;
+      specPeakHold[i]  = 38;
+      specPeakDecay[i] = 0.004;
+    }
+    if (specPeakHold[i] <= 0) {
+      specPeaks[i] = Math.max(0, specPeaks[i] - specPeakDecay[i]);
+      specPeakDecay[i] *= 1.03;
+    }
+
+    const x   = startX + i * (barW + barGap);
+    const h   = amp * barH;
+    const hue = 180 + (i / N) * 160 + bass * 35;
+
+    // Gradiente por barra
+    const grad = ctx.createLinearGradient(x, barY - h, x, barY);
+    grad.addColorStop(0, `hsla(${hue},92%,72%,${0.85 + amp * 0.15})`);
+    grad.addColorStop(0.5, `hsla(${hue - 20},88%,52%,${0.55 + amp * 0.35})`);
+    grad.addColorStop(1,   `hsla(${hue - 40},80%,28%,0.18)`);
+
+    ctx.fillStyle = grad;
+    ctx.fillRect(x, barY - h, barW, h);
+
+    // Glow en barras altas
+    if (amp > 0.55) {
+      ctx.shadowColor = `hsla(${hue},100%,70%,0.8)`;
+      ctx.shadowBlur  = 8 + amp * 16;
+      ctx.fillStyle   = `hsla(${hue},100%,82%,${(amp - 0.55) * 1.5})`;
+      ctx.fillRect(x, barY - h, barW, 2);
+      ctx.shadowBlur  = 0;
+    }
+
+    // Peak dot
+    if (specPeaks[i] > 0.04) {
+      ctx.fillStyle = `hsla(${hue},100%,88%,${Math.min(1, specPeaks[i] * 2.2)})`;
+      ctx.fillRect(x, barY - specPeaks[i] * barH - 2, barW, 2);
+    }
+  }
+
+  // ── LÍNEA DE BASE ────────────────────────────────────────────────────────
+  const baseGrad = ctx.createLinearGradient(startX, 0, startX + totalW, 0);
+  baseGrad.addColorStop(0,   'rgba(60,120,220,0.0)');
+  baseGrad.addColorStop(0.15, `rgba(80,160,255,${0.2 + vol * 0.3})`);
+  baseGrad.addColorStop(0.5,  `rgba(140,200,255,${0.35 + vol * 0.4})`);
+  baseGrad.addColorStop(0.85, `rgba(80,160,255,${0.2 + vol * 0.3})`);
+  baseGrad.addColorStop(1,   'rgba(60,120,220,0.0)');
+  ctx.strokeStyle = baseGrad;
+  ctx.lineWidth   = 1;
+  ctx.beginPath();
+  ctx.moveTo(startX, barY);
+  ctx.lineTo(startX + totalW, barY);
+  ctx.stroke();
+
+  // ── ESPEJO INFERIOR (reflejo fantasma) ───────────────────────────────────
+  for (let i = 0; i < N; i++) {
+    const amp = specSmooth[i];
+    if (amp < 0.02) continue;
+    const x   = startX + i * (barW + barGap);
+    const h   = amp * barH * 0.22;
+    const hue = 180 + (i / N) * 160 + bass * 35;
+    ctx.fillStyle = `hsla(${hue},80%,45%,${amp * 0.18})`;
+    ctx.fillRect(x, barY, barW, h);
+  }
+
+  // ── ETIQUETAS DE FRECUENCIA ──────────────────────────────────────────────
+  const freqLabels = [
+    { hz: 60,   label: '60' },
+    { hz: 200,  label: '200' },
+    { hz: 500,  label: '500' },
+    { hz: 1000, label: '1k' },
+    { hz: 2000, label: '2k' },
+    { hz: 5000, label: '5k' },
+    { hz: 10000, label: '10k' },
+  ];
+  ctx.font      = '9px "JetBrains Mono",monospace';
+  ctx.fillStyle = 'rgba(180,210,255,0.22)';
+  ctx.textAlign = 'center';
+  if (freqBinCount && analyser) {
+    const binHz = sampleRate / analyser.fftSize;
+    freqLabels.forEach(({ hz, label }) => {
+      const bin  = hz / binHz;
+      const frac = Math.pow(bin / (freqBinCount * 0.82), 1 / 1.6);
+      if (frac < 0 || frac > 1) return;
+      const x = startX + frac * totalW;
+      ctx.fillText(label, x, barY + 14);
+      ctx.fillStyle = 'rgba(80,140,220,0.1)';
+      ctx.fillRect(x, barY + 2, 0.5, 6);
+      ctx.fillStyle = 'rgba(180,210,255,0.22)';
+    });
+  }
+  ctx.textAlign = 'start';
+
+  ctx.font      = '10px "JetBrains Mono",monospace';
+  ctx.fillStyle = 'rgba(140,185,255,0.18)';
+  ctx.fillText('Hz', 18, canvasH - 18);
+}
+
+/* ═══════════════════════════════════════════════════════
+   MAPA DE VISUALIZADORES
+═══════════════════════════════════════════════════════ */
+const DRAW_FUNCS = {
+  fourier:    drawFourier,
+  lorenz:     drawLorenz,
+  lissajous:  drawLissajous,
+  polar:      drawPolar,
+  particles:  drawParticles,
+  chladni:    drawChladni,
+  hyperbolic: drawHyperbolic,
+  fibonacci:  drawFibonacci,
+  fifths:     drawFifths,
+  spectrum:   drawSpectrum,
+};
+
+/* ═══════════════════════════════════════════════════════
+   LOOP PRINCIPAL
+═══════════════════════════════════════════════════════ */
+let loopStarted = false;
+let startTime   = null;
+
+function renderLoop(timestamp) {
+  requestAnimationFrame(renderLoop);
+
+  if (!audioReady || paused) return;
+
+  analyser.getByteFrequencyData(freqData);
+  analyser.getByteTimeDomainData(timeData);
+
+  if (startTime === null) startTime = timestamp;
+  const elapsed = (timestamp - startTime) / 1000;
+
+  // Llamar al visualizador activo
+  if (DRAW_FUNCS[currentViz]) {
+    DRAW_FUNCS[currentViz](elapsed);
+  }
+
+  // Actualizar medidor de audio (cada frame, es liviano)
+  updateMeter();
+}
+
+// Fondo inicial del canvas
+ctx.fillStyle = '#01010c';
+ctx.fillRect(0, 0, canvasW, canvasH);
+</script>
+</body>
+</html>
