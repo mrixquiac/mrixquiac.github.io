@@ -1006,8 +1006,9 @@ function drawLorenz() {
   ctx.fillStyle = 'rgba(3,1,14,0.07)';
   ctx.fillRect(0, 0, canvasW, canvasH);
 
-  const sigma = 10, beta = 8 / 3;
-  const rho   = 22 + bass * 20 + mid * 5;
+  const sigma = 10 + high * 5;     // agudos → estructura
+  const beta  = 8 / 3 + mid * 1.5; // medios → estabilidad
+  const rho   = 22 + bass * 20;    // bajos → caos fuerte
   const dt    = 0.005;
 
   for (let s = 0; s < 8; s++) {
